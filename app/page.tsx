@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignInPage() {
@@ -32,9 +33,14 @@ export default function SignInPage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-6">
       {/* Logo */}
       <div className="mb-10 text-center">
-        <div className="w-20 h-20 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <span className="text-white text-3xl font-bold">د</span>
-        </div>
+        <Image
+          src="/logo.svg"
+          alt="دبرها"
+          width={80}
+          height={80}
+          className="mx-auto mb-4"
+          priority
+        />
         <h1 className="text-3xl font-extrabold text-gray-900">دبرها</h1>
         <p className="text-muted mt-2 text-sm">مساعدك الذكي للتحضير للمقابلات الوظيفية</p>
       </div>

@@ -23,9 +23,7 @@ export default function TrainingPage() {
   useEffect(() => {
     async function initSession() {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase
         .from("chat_sessions")
@@ -53,9 +51,7 @@ export default function TrainingPage() {
 
     if (sessionId) {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         await supabase.from("chat_messages").insert({
           session_id: sessionId,
@@ -95,10 +91,7 @@ export default function TrainingPage() {
             assistantContent += delta;
             setMessages((prev) => {
               const updated = [...prev];
-              updated[updated.length - 1] = {
-                role: "assistant",
-                content: assistantContent,
-              };
+              updated[updated.length - 1] = { role: "assistant", content: assistantContent };
               return updated;
             });
           } catch {}
@@ -107,9 +100,7 @@ export default function TrainingPage() {
 
       if (sessionId && assistantContent) {
         const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           await supabase.from("chat_messages").insert({
             session_id: sessionId,

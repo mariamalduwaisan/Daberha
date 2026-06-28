@@ -3,9 +3,7 @@ import Link from "next/link";
 
 export default async function HistoryPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: sessions } = await supabase
     .from("chat_sessions")
@@ -70,9 +68,7 @@ export default async function HistoryPage() {
                   className="bg-surface rounded-2xl border border-border p-4 flex items-center justify-between"
                 >
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900 text-sm">
-                      {session.title}
-                    </p>
+                    <p className="font-semibold text-gray-900 text-sm">{session.title}</p>
                     <p className="text-xs text-muted mt-0.5">
                       {new Date(session.created_at).toLocaleDateString("ar-KW", {
                         day: "numeric",

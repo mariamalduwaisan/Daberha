@@ -142,9 +142,7 @@ export default function MaterialsPage() {
               >
                 <span className="text-2xl shrink-0">{TYPE_ICON[r.type]}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm truncate">
-                    {r.title}
-                  </p>
+                  <p className="font-semibold text-gray-900 text-sm truncate">{r.title}</p>
                   <p className="text-xs text-muted mt-0.5">{r.meta}</p>
                 </div>
                 <button className="text-muted text-lg shrink-0">⬇</button>
@@ -172,9 +170,7 @@ export default function MaterialsPage() {
                   <span className="text-xl shrink-0">
                     {u.upload_type === "image" ? "🖼️" : "📄"}
                   </span>
-                  <p className="text-sm text-gray-900 flex-1 truncate">
-                    {u.file_name}
-                  </p>
+                  <p className="text-sm text-gray-900 flex-1 truncate">{u.file_name}</p>
                   <a
                     href={u.public_url}
                     target="_blank"
@@ -193,19 +189,13 @@ export default function MaterialsPage() {
       {showImageUpload && (
         <ImageUpload
           onClose={() => setShowImageUpload(false)}
-          onSuccess={(upload) => {
-            setUploads((prev) => [upload, ...prev]);
-            setShowImageUpload(false);
-          }}
+          onSuccess={(upload) => { setUploads((prev) => [upload, ...prev]); setShowImageUpload(false); }}
         />
       )}
       {showDocUpload && (
         <DocumentUpload
           onClose={() => setShowDocUpload(false)}
-          onSuccess={(upload) => {
-            setUploads((prev) => [upload, ...prev]);
-            setShowDocUpload(false);
-          }}
+          onSuccess={(upload) => { setUploads((prev) => [upload, ...prev]); setShowDocUpload(false); }}
         />
       )}
     </div>

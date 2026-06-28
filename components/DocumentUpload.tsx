@@ -26,14 +26,8 @@ export default function DocumentUpload({ onClose, onSuccess }: Props) {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (!ALLOWED_TYPES.includes(f.type)) {
-      setError("يُسمح فقط بـ PDF و DOCX");
-      return;
-    }
-    if (f.size > MAX_SIZE) {
-      setError("الحجم الأقصى 10 ميغابايت");
-      return;
-    }
+    if (!ALLOWED_TYPES.includes(f.type)) { setError("يُسمح فقط بـ PDF و DOCX"); return; }
+    if (f.size > MAX_SIZE) { setError("الحجم الأقصى 10 ميغابايت"); return; }
     setError("");
     setFile(f);
   }
@@ -44,59 +38,30 @@ export default function DocumentUpload({ onClose, onSuccess }: Props) {
     setProgress(10);
 
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-      setError("يجب تسجيل الدخول أولاً");
-      setUploading(false);
-      return;
-    }
+    if (!user) { setError("يجب تسجيل الدخول أولاً"); setUploading(false); return; }
 
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}.${ext}`;
 
     setProgress(40);
-    const { error: uploadError } = await supabase.storage
-      .from("documents")
-      .upload(path, file, { upsert: false });
+    const { error: uploadError } = await supabase.storage.from("documents").upload(path, file, { upsert: false });
 
-    if (uploadError) {
-      setError("فشل الرفع: " + uploadError.message);
-      setUploading(false);
-      return;
-    }
+    if (uploadError) { setError("فشل الرفع: " + uploadError.message); setUploading(false); return; }
 
     setProgress(75);
-    // Documents bucket is private — create a signed URL valid for 7 days
-    const { data: signedData } = await supabase.storage
-      .from("documents")
-      .createSignedUrl(path, 60 * 60 * 24 * 7);
+    const { data: signedData } = await supabase.storage.from("documents").createSignedUrl(path, 60 * 60 * 24 * 7);
     const publicUrl = signedData?.signedUrl ?? "";
 
     const { data: record, error: dbError } = await supabase
       .from("uploads")
-      .insert({
-        user_id: user.id,
-        file_name: file.name,
-        file_type: file.type,
-        file_size: file.size,
-        storage_path: path,
-        public_url: publicUrl,
-        upload_type: "document",
-      })
+      .insert({ user_id: user.id, file_name: file.name, file_type: file.type, file_size: file.size, storage_path: path, public_url: publicUrl, upload_type: "document" })
       .select()
       .single();
 
     setProgress(100);
-
-    if (dbError || !record) {
-      setError("فشل حفظ السجل");
-      setUploading(false);
-      return;
-    }
-
+    if (dbError || !record) { setError("فشل حفظ السجل"); setUploading(false); return; }
     onSuccess(record as Upload);
   }
 
@@ -105,9 +70,7 @@ export default function DocumentUpload({ onClose, onSuccess }: Props) {
       <div className="bg-surface rounded-t-3xl w-full max-w-[430px] p-6 pb-10">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-extrabold text-gray-900 text-lg">رفع مستند</h2>
-          <button onClick={onClose} className="text-muted text-xl w-8 h-8 flex items-center justify-center">
-            ✕
-          </button>
+          <button onClick={onClose} className="text-muted text-xl w-8 h-8 flex items-center justify-center">✕</button>
         </div>
 
         <div
@@ -118,9 +81,7 @@ export default function DocumentUpload({ onClose, onSuccess }: Props) {
             <div>
               <p className="text-2xl mb-1">📄</p>
               <p className="text-gray-900 font-medium text-sm">{file.name}</p>
-              <p className="text-xs text-muted mt-1">
-                {(file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
+              <p className="text-xs text-muted mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
           ) : (
             <>
@@ -130,23 +91,14 @@ export default function DocumentUpload({ onClose, onSuccess }: Props) {
             </>
           )}
         </div>
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          onChange={handleFileChange}
-          className="hidden"
-        />
+        <input ref={inputRef} type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={handleFileChange} className="hidden" />
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
         {uploading && (
           <div className="mb-4">
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-secondary rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
+              <div className="h-full bg-secondary rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
             </div>
             <p className="text-xs text-muted mt-1 text-center">{progress}%</p>
           </div>

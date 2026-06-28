@@ -33,9 +33,7 @@ const PLANS = [
 
 export default async function PlansPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: activity } = await supabase
     .from("user_activity")
@@ -48,8 +46,7 @@ export default async function PlansPage() {
     if (a.resource_id) progressMap[a.resource_id] = a.metadata?.progress ?? 0;
   });
 
-  const activePlan =
-    PLANS.find((p) => (progressMap[p.id] ?? 0) > 0) ?? null;
+  const activePlan = PLANS.find((p) => (progressMap[p.id] ?? 0) > 0) ?? null;
 
   return (
     <div className="flex flex-col min-h-screen bg-neutral">
@@ -66,9 +63,7 @@ export default async function PlansPage() {
             <p className="text-xs text-muted mb-3">الخطة النشطة</p>
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
-                <h2 className="font-extrabold text-gray-900 text-base">
-                  {activePlan.title}
-                </h2>
+                <h2 className="font-extrabold text-gray-900 text-base">{activePlan.title}</h2>
                 <span className="text-xs text-secondary font-medium bg-secondary/10 rounded-full px-2 py-0.5 inline-block mt-1">
                   قيد التقدم
                 </span>
@@ -102,21 +97,15 @@ export default async function PlansPage() {
             <span className="text-xs text-muted">{PLANS.length} خطط</span>
           </div>
           <div className="space-y-3">
-            {PLANS.filter(
-              (p) => !activePlan || p.id !== activePlan.id
-            ).map((plan) => (
+            {PLANS.filter((p) => !activePlan || p.id !== activePlan.id).map((plan) => (
               <div
                 key={plan.id}
                 className="bg-surface rounded-2xl border border-border p-4 flex items-center gap-4"
               >
                 <span className="text-2xl shrink-0">{plan.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm">
-                    {plan.title}
-                  </p>
-                  <p className="text-xs text-muted mt-0.5">
-                    {plan.unitCount} وحدات تعليمية
-                  </p>
+                  <p className="font-semibold text-gray-900 text-sm">{plan.title}</p>
+                  <p className="text-xs text-muted mt-0.5">{plan.unitCount} وحدات تعليمية</p>
                 </div>
                 <button className="text-xs font-bold text-primary border border-primary rounded-full px-3 py-1.5 shrink-0 transition hover:bg-primary hover:text-white">
                   بدء

@@ -1,0 +1,28 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9B51E0"/>
+      <stop offset="1" stop-color="#7B31C0"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="40" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="80" height="80" rx="20" fill="url(#bg)"/>
+
+  <!-- Subtle top shine -->
+  <rect width="80" height="40" rx="20" fill="url(#shine)"/>
+
+  <!-- Mic body -->
+  <rect x="33" y="16" width="14" height="24" rx="7" fill="white"/>
+
+  <!-- Mic arc -->
+  <path d="M22 38c0 9.941 8.059 18 18 18s18-8.059 18-18" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+  <!-- Mic stand -->
+  <line x1="40" y1="56" x2="40" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <line x1="32" y1="64" x2="48" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>
