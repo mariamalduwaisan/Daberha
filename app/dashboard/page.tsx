@@ -1,11 +1,45 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { Bell, BookOpen, Mic2, Clock, Map, ChevronLeft, Sparkles } from "lucide-react";
+
+const quickLinks = [
+  {
+    href: "/dashboard/materials",
+    label: "المصادر",
+    sub: "مكتبة الدروس والملفات",
+    Icon: BookOpen,
+    iconBg: "bg-secondary/10",
+    iconColor: "text-secondary",
+  },
+  {
+    href: "/dashboard/training",
+    label: "تدريب",
+    sub: "مقابلات تجريبية ذكية",
+    Icon: Mic2,
+    iconBg: "bg-primary/10",
+    iconColor: "text-primary",
+  },
+  {
+    href: "/dashboard/history",
+    label: "السجل",
+    sub: "أداؤك وتقدمك المحرز",
+    Icon: Clock,
+    iconBg: "bg-emerald-50",
+    iconColor: "text-emerald-600",
+  },
+  {
+    href: "/dashboard/plans",
+    label: "الخطط",
+    sub: "مساراتك التعليمية",
+    Icon: Map,
+    iconBg: "bg-orange-50",
+    iconColor: "text-orange-500",
+  },
+];
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -18,79 +52,51 @@ export default async function DashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("user_id", user!.id);
 
-  const name =
-    profile?.full_name || user?.email?.split("@")[0] || "المستخدم";
-
-  const quickLinks = [
-    {
-      href: "/dashboard/materials",
-      label: "المواد",
-      sub: "مكتبة المصادر والدروس",
-      emoji: "📚",
-      bg: "bg-blue-50",
-      border: "border-blue-100",
-    },
-    {
-      href: "/dashboard/training",
-      label: "تدريب",
-      sub: "مقابلات تجريبية ذكية",
-      emoji: "🎤",
-      bg: "bg-purple-50",
-      border: "border-purple-100",
-    },
-    {
-      href: "/dashboard/history",
-      label: "السجل",
-      sub: "الأداء والتقدم المحرز",
-      emoji: "📊",
-      bg: "bg-emerald-50",
-      border: "border-emerald-100",
-    },
-    {
-      href: "/dashboard/plans",
-      label: "الخطط",
-      sub: "مساراتك التعليمية",
-      emoji: "🗺️",
-      bg: "bg-amber-50",
-      border: "border-amber-100",
-    },
-  ];
+  const name = profile?.full_name || user?.email?.split("@")[0] || "المستخدم";
+  const initials = name.slice(0, 2).toUpperCase();
 
   return (
-    <div className="flex flex-col min-h-screen bg-neutral">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-5 pt-12 pb-4 bg-surface shadow-sm">
-        <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-          🔔
+    <div className="flex flex-col min-h-screen bg-neutral pb-24">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 pt-12 pb-4 bg-surface border-b border-border">
+        <button
+          aria-label="الإشعارات"
+          className="w-11 h-11 rounded-full bg-neutral border border-border flex items-center justify-center text-muted transition active:scale-95"
+        >
+          <Bell size={20} />
         </button>
         <span className="text-lg font-extrabold text-primary">دبرها</span>
-        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-sm">
-          {name.charAt(0).toUpperCase()}
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm select-none">
+          {initials}
         </div>
       </div>
 
       <div className="flex-1 px-5 py-6 space-y-6">
         {/* Greeting */}
         <div>
-          <h2 className="text-xl font-bold text-gray-900">مرحباً، {name}! 👋</h2>
-          <p className="text-muted text-sm mt-1">
+          <h2 className="text-2xl font-extrabold text-gray-900">مرحباً، {name}</h2>
+          <p className="text-muted text-sm mt-1 leading-relaxed">
             {sessionCount
-              ? `أجريت ${sessionCount} جلسة حتى الآن · استمر!`
+              ? `أجريت ${sessionCount} جلسة حتى الآن · استمر في التحضير!`
               : "ابدأ أولى جلساتك التدريبية اليوم"}
           </p>
         </div>
 
         {/* Quick links grid */}
         <div className="grid grid-cols-2 gap-3">
-          {quickLinks.map((item) => (
+          {quickLinks.map(({ href, label, sub, Icon, iconBg, iconColor }) => (
             <Link
-              key={item.href}
-              href={item.href}
-              className={`rounded-2xl border ${item.bg} ${item.border} p-4 flex flex-col gap-2 transition active:scale-95`}
+              key={href}
+              href={href}
+              className="bg-surface rounded-2xl border border-border p-4 flex flex-col gap-3 transition active:scale-95 hover:border-primary/30 hover:shadow-sm"
             >
-              <span className="text-2xl">{item.emoji}</span>
-              <span className="font-bold text-gray-900 text-sm">{item.label}</span>
-              <span className="text-xs text-muted leading-snug">{item.sub}</span>
+              <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center`}>
+                <Icon size={20} className={iconColor} />
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">{label}</p>
+                <p className="text-xs text-muted mt-0.5 leading-snug">{sub}</p>
+              </div>
             </Link>
           ))}
         </div>
@@ -98,21 +104,21 @@ export default async function DashboardPage() {
         {/* Featured CTA */}
         <Link
           href="/dashboard/training"
-          className="block rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white p-5 shadow-md transition active:scale-95"
+          className="block rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white p-5 shadow-lg shadow-primary/20 transition active:scale-95"
         >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-semibold bg-white/20 rounded-full px-2 py-0.5">
-              ميزة جديدة
-            </span>
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles size={14} className="text-white/70" />
+            <span className="text-xs font-semibold text-white/80">ذكاء اصطناعي</span>
           </div>
-          <h3 className="text-lg font-bold leading-snug">
+          <h3 className="text-lg font-extrabold leading-snug">
             مقابلات تجريبية بالذكاء الاصطناعي
           </h3>
-          <p className="text-sm text-white/80 mt-1 leading-relaxed">
+          <p className="text-sm text-white/75 mt-1.5 leading-relaxed">
             تدرب على أسئلة المقابلة وتلقَّ ملاحظات فورية من مساعدنا الذكي.
           </p>
-          <div className="mt-4 inline-block bg-white text-primary text-sm font-bold rounded-full px-4 py-1.5">
-            ابدأ الآن ←
+          <div className="mt-4 inline-flex items-center gap-1 bg-white text-primary text-sm font-bold rounded-full px-4 py-1.5">
+            ابدأ الآن
+            <ChevronLeft size={14} />
           </div>
         </Link>
       </div>

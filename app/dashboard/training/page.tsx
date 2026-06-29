@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ChatMessage from "@/components/ChatMessage";
+import { Bot, Sparkles, SendHorizonal } from "lucide-react";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -135,7 +136,8 @@ export default function TrainingPage() {
             <h1 className="text-xl font-extrabold text-gray-900">التدريب</h1>
             <p className="text-muted text-xs">مقابلات تجريبية بالذكاء الاصطناعي</p>
           </div>
-          <span className="text-xs font-semibold bg-primary/10 text-primary rounded-full px-2 py-1">
+          <span className="flex items-center gap-1 text-xs font-semibold bg-primary/10 text-primary rounded-full px-2 py-1">
+            <Sparkles size={11} />
             ذكاء اصطناعي
           </span>
         </div>
@@ -145,11 +147,12 @@ export default function TrainingPage() {
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 no-scrollbar">
         {messages.length === 0 && (
           <div className="text-center pt-8">
-            <p className="text-4xl mb-3">🤖</p>
-            <p className="font-bold text-gray-900">مرحباً! أنا مساعدك الذكي</p>
+            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+              <Bot size={30} className="text-primary" />
+            </div>
+            <p className="font-extrabold text-gray-900 text-lg">مرحباً! أنا مساعدك الذكي</p>
             <p className="text-muted text-sm mt-2 leading-relaxed max-w-xs mx-auto">
               يمكنني مساعدتك في التحضير للمقابلات المصرفية.
-              <br />
               ابدأ بإخباري عن الوظيفة التي تتقدم لها.
             </p>
             <div className="mt-5 space-y-2">
@@ -157,7 +160,7 @@ export default function TrainingPage() {
                 <button
                   key={q}
                   onClick={() => sendMessage(q)}
-                  className="block w-full text-right text-sm text-secondary font-medium bg-secondary/5 rounded-xl px-4 py-2.5 border border-secondary/20 transition hover:bg-secondary/10"
+                  className="block w-full text-right text-sm text-primary font-medium bg-primary/5 rounded-xl px-4 py-3 border border-primary/15 transition active:scale-95 hover:bg-primary/10"
                 >
                   {q}
                 </button>
@@ -195,9 +198,10 @@ export default function TrainingPage() {
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center text-xl disabled:opacity-40 transition active:scale-95"
+            aria-label="إرسال"
+            className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center disabled:opacity-40 transition active:scale-95"
           >
-            ←
+            <SendHorizonal size={20} />
           </button>
         </div>
       </form>
