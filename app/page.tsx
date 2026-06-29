@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignInPage() {
@@ -33,14 +32,25 @@ export default function SignInPage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-6">
       {/* Logo */}
       <div className="mb-10 text-center">
-        <Image
-          src="/logo.svg"
-          alt="دبرها"
-          width={80}
-          height={80}
-          className="mx-auto mb-4"
-          priority
-        />
+        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-4" style={{ borderRadius: "22px" }}>
+          <defs>
+            <linearGradient id="daberha-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#9B51E0"/>
+              <stop offset="50%" stopColor="#7B5FD8"/>
+              <stop offset="100%" stopColor="#4A90E2"/>
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="22" fill="url(#daberha-bg)"/>
+          <text
+            x="50"
+            y="62"
+            textAnchor="middle"
+            fontSize="38"
+            fontWeight="800"
+            fill="white"
+            fontFamily="Cairo, sans-serif"
+          >دبرها</text>
+        </svg>
         <h1 className="text-3xl font-extrabold text-gray-900">دبرها</h1>
         <p className="text-muted mt-2 text-sm">مساعدك الذكي للتحضير للمقابلات الوظيفية</p>
       </div>
