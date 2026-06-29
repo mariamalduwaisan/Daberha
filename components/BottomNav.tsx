@@ -63,7 +63,7 @@ export default function BottomNav() {
               key={tab.href}
               href={tab.href}
               className={`flex-1 flex flex-col items-center py-3 gap-1 transition-colors ${
-                isActive ? "text-secondary" : "text-muted"
+                isActive ? "text-primary" : "text-muted"
               }`}
             >
               {tab.icon(isActive)}

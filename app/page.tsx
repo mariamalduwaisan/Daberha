@@ -35,8 +35,8 @@ export default function SignInPage() {
         <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-4" style={{ borderRadius: "22px" }}>
           <defs>
             <linearGradient id="daberha-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#9B51E0"/>
-              <stop offset="50%" stopColor="#7B5FD8"/>
+              <stop offset="0%" stopColor="#7C3AED"/>
+              <stop offset="50%" stopColor="#6D4FE0"/>
               <stop offset="100%" stopColor="#4A90E2"/>
             </linearGradient>
           </defs>
@@ -67,7 +67,7 @@ export default function SignInPage() {
           </p>
           <button
             onClick={() => { setSent(false); setEmail(""); }}
-            className="mt-6 text-primary text-sm font-semibold"
+            className="mt-6 text-secondary text-sm font-semibold"
           >
             إرسال إلى بريد آخر
           </button>
@@ -88,7 +88,7 @@ export default function SignInPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="example@email.com"
               dir="ltr"
-              className="w-full px-4 py-3 rounded-xl border border-border bg-neutral text-gray-900 placeholder-muted text-left focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition"
+              className="w-full px-4 py-3 rounded-xl border border-border bg-neutral text-gray-900 placeholder-muted text-left focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
             />
           </div>
 
@@ -97,7 +97,7 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-secondary text-white font-bold text-base shadow hover:bg-secondary-dark transition disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-primary text-white font-bold text-base shadow hover:bg-primary-dark transition disabled:opacity-50"
           >
             {loading ? "جاري الإرسال..." : "أرسل رابط الدخول"}
           </button>

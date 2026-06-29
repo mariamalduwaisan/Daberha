@@ -22,7 +22,7 @@ const FEATURED = [
     description: "فيديو: كيف يختلف بنك بوبيان؟",
     type: "video",
     badge: "⭐",
-    gradient: "from-secondary to-secondary-dark",
+    gradient: "from-primary to-primary-dark",
   },
 ];
 
@@ -66,13 +66,13 @@ export default function MaterialsPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setShowImageUpload(true)}
-              className="text-xs font-semibold bg-primary/10 text-primary rounded-full px-3 py-1"
+              className="text-xs font-semibold bg-secondary/10 text-secondary rounded-full px-3 py-1"
             >
               + صورة
             </button>
             <button
               onClick={() => setShowDocUpload(true)}
-              className="text-xs font-semibold bg-secondary/10 text-secondary rounded-full px-3 py-1"
+              className="text-xs font-semibold bg-primary/10 text-primary rounded-full px-3 py-1"
             >
               + مستند
             </button>
@@ -83,7 +83,7 @@ export default function MaterialsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="ابحث في المصادر"
-          className="w-full px-4 py-2.5 rounded-xl border border-border bg-neutral text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full px-4 py-2.5 rounded-xl border border-border bg-neutral text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
         />
         <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar pb-1">
           {FILTERS.map((f) => (
@@ -92,7 +92,7 @@ export default function MaterialsPage() {
               onClick={() => setFilter(f)}
               className={`shrink-0 text-xs font-semibold rounded-full px-3 py-1.5 transition ${
                 filter === f
-                  ? "bg-secondary text-white"
+                  ? "bg-primary text-white"
                   : "bg-gray-100 text-gray-600"
               }`}
             >
@@ -132,7 +132,7 @@ export default function MaterialsPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-bold text-gray-900">أحدث المصادر</h2>
-            <button className="text-xs text-primary font-medium">عرض الكل</button>
+            <button className="text-xs text-secondary font-medium">عرض الكل</button>
           </div>
           <div className="space-y-3">
             {filtered.map((r) => (
@@ -175,7 +175,7 @@ export default function MaterialsPage() {
                     href={u.public_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary text-xs font-medium shrink-0"
+                    className="text-secondary text-xs font-medium shrink-0"
                   >
                     فتح
                   </a>

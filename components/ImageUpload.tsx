@@ -71,7 +71,7 @@ export default function ImageUpload({ onClose, onSuccess }: Props) {
 
         <div
           onClick={() => inputRef.current?.click()}
-          className="border-2 border-dashed border-border rounded-2xl p-8 text-center cursor-pointer hover:border-primary transition mb-4"
+          className="border-2 border-dashed border-border rounded-2xl p-8 text-center cursor-pointer hover:border-secondary transition mb-4"
         >
           {file ? (
             <div>
@@ -94,7 +94,7 @@ export default function ImageUpload({ onClose, onSuccess }: Props) {
         {uploading && (
           <div className="mb-4">
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+              <div className="h-full bg-secondary rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
             </div>
             <p className="text-xs text-muted mt-1 text-center">{progress}%</p>
           </div>
@@ -103,7 +103,7 @@ export default function ImageUpload({ onClose, onSuccess }: Props) {
         <button
           onClick={handleUpload}
           disabled={!file || uploading}
-          className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm disabled:opacity-40 transition active:scale-95"
+          className="w-full py-3 rounded-xl bg-secondary text-white font-bold text-sm disabled:opacity-40 transition active:scale-95"
         >
           {uploading ? "جاري الرفع..." : "رفع الصورة"}
         </button>

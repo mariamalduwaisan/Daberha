@@ -10,14 +10,14 @@ export default function ChatMessage({ role, content, loading }: Props) {
   return (
     <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1">
           AI
         </div>
       )}
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
           isUser
-            ? "bg-secondary text-white rounded-tl-sm"
+            ? "bg-primary text-white rounded-tl-sm"
             : "bg-surface border border-border text-gray-900 rounded-tr-sm"
         }`}
       >

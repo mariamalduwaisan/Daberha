@@ -29,13 +29,13 @@ export default async function HistoryPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-surface rounded-2xl p-4 border border-border text-center">
-            <p className="text-3xl font-extrabold text-secondary">
+            <p className="text-3xl font-extrabold text-primary">
               {avgScore != null ? `${avgScore}%` : "—"}
             </p>
             <p className="text-xs text-muted mt-1">متوسط الدرجة</p>
           </div>
           <div className="bg-surface rounded-2xl p-4 border border-border text-center">
-            <p className="text-3xl font-extrabold text-primary">
+            <p className="text-3xl font-extrabold text-secondary">
               {sessions?.length ?? 0}
             </p>
             <p className="text-xs text-muted mt-1">إجمالي الجلسات</p>
@@ -55,7 +55,7 @@ export default async function HistoryPage() {
               </p>
               <Link
                 href="/dashboard/training"
-                className="mt-4 inline-block bg-secondary text-white text-sm font-bold rounded-full px-5 py-2"
+                className="mt-4 inline-block bg-primary text-white text-sm font-bold rounded-full px-5 py-2"
               >
                 ابدأ التدريب
               </Link>

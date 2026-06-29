@@ -135,7 +135,7 @@ export default function TrainingPage() {
             <h1 className="text-xl font-extrabold text-gray-900">التدريب</h1>
             <p className="text-muted text-xs">مقابلات تجريبية بالذكاء الاصطناعي</p>
           </div>
-          <span className="text-xs font-semibold bg-secondary/10 text-secondary rounded-full px-2 py-1">
+          <span className="text-xs font-semibold bg-primary/10 text-primary rounded-full px-2 py-1">
             ذكاء اصطناعي
           </span>
         </div>
@@ -157,7 +157,7 @@ export default function TrainingPage() {
                 <button
                   key={q}
                   onClick={() => sendMessage(q)}
-                  className="block w-full text-right text-sm text-primary font-medium bg-primary/5 rounded-xl px-4 py-2.5 border border-primary/20 transition hover:bg-primary/10"
+                  className="block w-full text-right text-sm text-secondary font-medium bg-secondary/5 rounded-xl px-4 py-2.5 border border-secondary/20 transition hover:bg-secondary/10"
                 >
                   {q}
                 </button>
@@ -190,12 +190,12 @@ export default function TrainingPage() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="اكتب رسالتك..."
             disabled={loading}
-            className="flex-1 px-4 py-3 rounded-xl border border-border bg-neutral text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-secondary disabled:opacity-50 transition"
+            className="flex-1 px-4 py-3 rounded-xl border border-border bg-neutral text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition"
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="w-12 h-12 rounded-xl bg-secondary text-white flex items-center justify-center text-xl disabled:opacity-40 transition active:scale-95"
+            className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center text-xl disabled:opacity-40 transition active:scale-95"
           >
             ←
           </button>

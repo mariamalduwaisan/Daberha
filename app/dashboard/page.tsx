@@ -60,11 +60,11 @@ export default async function DashboardPage() {
     <div className="flex flex-col min-h-screen bg-neutral">
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-12 pb-4 bg-surface shadow-sm">
-        <button className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+        <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
           🔔
         </button>
-        <span className="text-lg font-extrabold text-secondary">دبرها</span>
-        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
+        <span className="text-lg font-extrabold text-primary">دبرها</span>
+        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-sm">
           {name.charAt(0).toUpperCase()}
         </div>
       </div>
@@ -98,7 +98,7 @@ export default async function DashboardPage() {
         {/* Featured CTA */}
         <Link
           href="/dashboard/training"
-          className="block rounded-2xl bg-gradient-to-br from-secondary to-secondary-dark text-white p-5 shadow-md transition active:scale-95"
+          className="block rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white p-5 shadow-md transition active:scale-95"
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold bg-white/20 rounded-full px-2 py-0.5">
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
           <p className="text-sm text-white/80 mt-1 leading-relaxed">
             تدرب على أسئلة المقابلة وتلقَّ ملاحظات فورية من مساعدنا الذكي.
           </p>
-          <div className="mt-4 inline-block bg-white text-secondary text-sm font-bold rounded-full px-4 py-1.5">
+          <div className="mt-4 inline-block bg-white text-primary text-sm font-bold rounded-full px-4 py-1.5">
             ابدأ الآن ←
           </div>
         </Link>
