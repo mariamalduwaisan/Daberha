@@ -23,18 +23,33 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // IMPORTANT: refreshes the session if the access token is expired.
+  // Must be called before any redirect logic.
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
 
+  // Unauthenticated user trying to access dashboard
   if (!user && pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/", request.url));
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    const redirect = NextResponse.redirect(url);
+    // Forward any refreshed session cookies so the next request is still authenticated
+    supabaseResponse.cookies.getAll().forEach((c) =>
+      redirect.cookies.set(c.name, c.value, { path: "/" })
+    );
+    return redirect;
   }
 
+  // Authenticated user visiting the sign-in page — send them straight to the app
   if (user && pathname === "/") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    const redirect = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((c) =>
+      redirect.cookies.set(c.name, c.value, { path: "/" })
+    );
+    return redirect;
   }
 
   return supabaseResponse;
