@@ -51,12 +51,17 @@ export default function MaterialsPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase
-      .from("uploads")
-      .select("id, file_name, public_url, upload_type")
-      .order("created_at", { ascending: false })
-      .limit(10)
-      .then(({ data }) => setUploads(data ?? []));
+    // A01: filter by user_id — never expose other users' uploads
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase
+        .from("uploads")
+        .select("id, file_name, public_url, upload_type")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10)
+        .then(({ data }) => setUploads(data ?? []));
+    });
   }, []);
 
   const filtered = RESOURCES.filter((r) => !search || r.title.includes(search));

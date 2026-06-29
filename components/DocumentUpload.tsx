@@ -51,7 +51,8 @@ export default function DocumentUpload({ onClose, onSuccess }: Props) {
     if (uploadError) { setError("فشل الرفع: " + uploadError.message); setUploading(false); return; }
 
     setProgress(75);
-    const { data: signedData } = await supabase.storage.from("documents").createSignedUrl(path, 60 * 60 * 24 * 7);
+    // A02: 1-hour expiry — minimise exposure if a signed URL is leaked
+    const { data: signedData } = await supabase.storage.from("documents").createSignedUrl(path, 60 * 60);
     const publicUrl = signedData?.signedUrl ?? "";
 
     const { data: record, error: dbError } = await supabase
