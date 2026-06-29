@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
         Connection: "keep-alive",
       },
     });
-  } catch {
-    return NextResponse.json({ error: "AI service error" }, { status: 500 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "AI service error";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

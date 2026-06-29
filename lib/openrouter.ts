@@ -42,13 +42,16 @@ export async function streamChat(messages: Message[]): Promise<ReadableStream<Ui
       "X-Title": "دبرها – مساعد المقابلات",
     },
     body: JSON.stringify({
-      model: "anthropic/claude-3.5-haiku",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
       stream: true,
     }),
   });
 
-  if (!response.ok) throw new Error(`OpenRouter error: ${response.status}`);
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`OpenRouter ${response.status}: ${errText}`);
+  }
   return response.body!;
 }
 

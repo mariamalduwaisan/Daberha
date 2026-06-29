@@ -70,6 +70,10 @@ export default function TrainingPage() {
         body: JSON.stringify({ messages: newMessages, sessionId }),
       });
 
+      if (!response.ok) {
+        const { error } = await response.json().catch(() => ({ error: "خطأ غير معروف" }));
+        throw new Error(error);
+      }
       if (!response.body) throw new Error("No response body");
 
       const reader = response.body.getReader();
