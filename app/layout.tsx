@@ -5,7 +5,7 @@ import "./globals.css";
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
   display: "swap",
-  weight: ["400", "600", "700"],
+  weight: ["400", "600", "700", "800"],
   variable: "--font-cairo",
 });
 
@@ -25,9 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ar" dir="rtl">
       <body className={`${cairo.variable} ${tajawal.variable} antialiased`}>
-        <div className="max-w-[430px] mx-auto min-h-screen relative overflow-x-hidden">
-          {children}
-        </div>
+        {children}
       </body>
     </html>
   );

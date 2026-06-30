@@ -5,18 +5,18 @@ import { usePathname } from "next/navigation";
 import { Clock, Map, BookOpen, Mic2 } from "lucide-react";
 
 const tabs = [
-  { href: "/dashboard/history", label: "السجل",    Icon: Clock   },
-  { href: "/dashboard/plans",   label: "الخطط",    Icon: Map     },
-  { href: "/dashboard/materials", label: "المصادر", Icon: BookOpen },
-  { href: "/dashboard/training", label: "تدريب",   Icon: Mic2    },
+  { href: "/dashboard/history",   label: "السجل",    Icon: Clock    },
+  { href: "/dashboard/plans",     label: "الخطط",    Icon: Map      },
+  { href: "/dashboard/materials", label: "المصادر",  Icon: BookOpen },
+  { href: "/dashboard/training",  label: "تدريب",    Icon: Mic2     },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 max-w-[430px] mx-auto bg-surface border-t border-border z-50">
-      <div className="flex pb-safe">
+    <nav className="fixed bottom-0 inset-x-0 bg-surface border-t border-border z-50 md:hidden">
+      <div className="flex pb-safe max-w-lg mx-auto">
         {tabs.map(({ href, label, Icon }) => {
           const isActive = pathname.startsWith(href);
           return (
