@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
-  CheckCircle2, Lock, Zap, BookOpen,
+  CheckCircle2, Lock, BookOpen,
   Building2, Headphones, Users, TrendingUp,
   ChevronRight, ChevronLeft, Phone, Layers,
   Truck, Shield, FileText, ExternalLink, ArrowLeft, ArrowRight,
@@ -118,10 +117,12 @@ function StepIcon({ status }: { status: StepStatus }) {
 
 export default function PlansPage() {
   const { lang, isRTL } = useLanguage();
-  const [progressMap,    setProgressMap]    = useState<Record<string, number>>({});
-  const [activeGroup,    setActiveGroup]    = useState<"all" | PlanGroup>("all");
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-  const [saving,         setSaving]         = useState(false);
+  const [progressMap,      setProgressMap]      = useState<Record<string, number>>({});
+  const [activeGroup,      setActiveGroup]      = useState<"all" | PlanGroup>("all");
+  const [selectedPlanId,   setSelectedPlanId]   = useState<string | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [saving,           setSaving]           = useState(false);
+  const [marking,          setMarking]          = useState(false);
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
@@ -130,41 +131,77 @@ export default function PlansPage() {
         .select("resource_id,metadata")
         .eq("user_id", user.id)
         .eq("activity_type", "plan_progress")
+        .order("created_at", { ascending: false })   // latest first
         .then(({ data }) => {
           const map: Record<string, number> = {};
-          (data ?? []).forEach((a) => { if (a.resource_id) map[a.resource_id] = a.metadata?.progress ?? 0; });
+          // first-wins = latest row wins per plan
+          (data ?? []).forEach((a) => {
+            if (a.resource_id && !(a.resource_id in map)) {
+              map[a.resource_id] = a.metadata?.step ?? a.metadata?.progress ?? 0;
+            }
+          });
           setProgressMap(map);
-          // Grid is always the landing — user picks plan explicitly each visit
         });
     });
   }, []);
 
   async function selectPlan(planId: string) {
+    const saved = progressMap[planId] ?? 0;
     setSelectedPlanId(planId);
-    setSaving(true);
+    setCurrentStepIndex(saved);
+
+    // Save initial visit if never opened before
+    if (!(planId in progressMap)) {
+      setSaving(true);
+      try {
+        const sb = createClient();
+        const { data: { user } } = await sb.auth.getUser();
+        if (user) {
+          await sb.from("user_activity").insert({
+            user_id: user.id, activity_type: "plan_progress",
+            resource_id: planId, metadata: { step: 0 },
+          });
+          setProgressMap((prev) => ({ ...prev, [planId]: 0 }));
+        }
+      } finally {
+        setSaving(false);
+      }
+    }
+  }
+
+  async function markStepDone() {
+    if (!displayPlan || marking) return;
+    const rawSteps = PLAN_STEPS[displayPlan.id] ?? [];
+    const nextIndex = Math.min(currentStepIndex + 1, rawSteps.length);
+    setCurrentStepIndex(nextIndex);
+    setProgressMap((prev) => ({ ...prev, [displayPlan.id]: nextIndex }));
+    setMarking(true);
     try {
       const sb = createClient();
       const { data: { user } } = await sb.auth.getUser();
       if (user) {
         await sb.from("user_activity").insert({
-          user_id:       user.id,
-          activity_type: "plan_progress",
-          resource_id:   planId,
-          metadata:      { progress: 5 },
+          user_id: user.id, activity_type: "plan_progress",
+          resource_id: displayPlan.id, metadata: { step: nextIndex },
         });
-        setProgressMap((prev) => ({ ...prev, [planId]: 5 }));
       }
     } finally {
-      setSaving(false);
+      setMarking(false);
     }
   }
 
-  const displayPlan = selectedPlanId ? (PLANS.find((p) => p.id === selectedPlanId) ?? null) : null;
-  const steps       = displayPlan ? (PLAN_STEPS[displayPlan.id] ?? []) : [];
-  const activeStep  = steps.find((s) => s.status === "active");
-  const doneCount   = steps.filter((s) => s.status === "done").length;
+  const displayPlan  = selectedPlanId ? (PLANS.find((p) => p.id === selectedPlanId) ?? null) : null;
+  const rawSteps     = displayPlan ? (PLAN_STEPS[displayPlan.id] ?? []) : [];
+  // Compute statuses from currentStepIndex, ignoring the hardcoded values in data
+  const steps = rawSteps.map((s, i) => ({
+    ...s,
+    status: (i < currentStepIndex ? "done" : i === currentStepIndex ? "active" : "locked") as StepStatus,
+  }));
+  const doneCount   = currentStepIndex;
+  const totalSteps  = rawSteps.length;
+  const progressPct = totalSteps > 0 ? Math.round((doneCount / totalSteps) * 100) : 0;
+  const isComplete  = totalSteps > 0 && doneCount >= totalSteps;
   const Chevron     = isRTL ? ChevronLeft : ChevronRight;
-  const BackIcon    = isRTL ? ChevronRight : ChevronLeft;
 
   const displayedPlans = PLANS.filter((p) => activeGroup === "all" || p.group === activeGroup);
 
@@ -198,15 +235,35 @@ export default function PlansPage() {
                   <p className="text-xs text-white/60 mt-1">{isRTL ? displayPlan.descAr : displayPlan.descEn}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <span className="text-2xl font-extrabold text-white">{progressMap[displayPlan.id] ?? 0}%</span>
-                  <p className="text-xs text-white/50 mt-0.5">{doneCount} {tx(t.plans.from, lang)} {steps.length}</p>
+                  <span className="text-2xl font-extrabold text-white">{progressPct}%</span>
+                  <p className="text-xs text-white/50 mt-0.5">{doneCount} {tx(t.plans.from, lang)} {totalSteps}</p>
                 </div>
               </div>
               <div className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                <div className="h-full bg-white rounded-full transition-all"
-                  style={{ width: `${progressMap[displayPlan.id] ?? 0}%` }} />
+                <div className="h-full bg-white rounded-full transition-all duration-500"
+                  style={{ width: `${progressPct}%` }} />
               </div>
             </div>
+
+            {/* Completion banner */}
+            {isComplete && (
+              <div className="bg-emerald-500 rounded-2xl p-6 text-center space-y-2">
+                <p className="text-3xl">🎉</p>
+                <p className="font-extrabold text-white text-lg">
+                  {isRTL ? "أتممت الخطة بنجاح!" : "Plan complete!"}
+                </p>
+                <p className="text-sm text-white/70">
+                  {isRTL
+                    ? "أحسنت! يمكنك الآن تجربة مقابلة حقيقية في قسم التدريب."
+                    : "Well done! Head to Training for a full mock interview."}
+                </p>
+                <button
+                  onClick={() => setSelectedPlanId(null)}
+                  className="mt-2 inline-block bg-white text-emerald-600 font-bold text-sm rounded-xl px-6 py-2.5 transition hover:bg-emerald-50 active:scale-95">
+                  {isRTL ? "اختر خطة أخرى" : "Choose another plan"}
+                </button>
+              </div>
+            )}
 
             {/* Steps list */}
             <div className="bg-surface rounded-2xl border border-border overflow-hidden">
@@ -215,7 +272,7 @@ export default function PlansPage() {
               </div>
               <div className="divide-y divide-border">
                 {steps.map((step, idx) => (
-                  <div key={step.id} className={`flex items-start gap-4 px-6 py-4 ${step.status === "locked" ? "opacity-40" : ""}`}>
+                  <div key={step.id} className={`flex items-start gap-4 px-6 py-4 transition-opacity ${step.status === "locked" ? "opacity-35" : ""}`}>
                     <div className="mt-0.5 shrink-0"><StepIcon status={step.status} /></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -232,7 +289,7 @@ export default function PlansPage() {
                         )}
                       </div>
                       <p className="text-xs text-muted">{isRTL ? step.descAr : step.descEn}</p>
-                      {step.resourceUrl && (
+                      {step.resourceUrl && step.status !== "locked" && (
                         <a href={step.resourceUrl} target="_blank" rel="noopener noreferrer"
                           className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold text-primary hover:underline">
                           <FileText size={11} />
@@ -241,10 +298,15 @@ export default function PlansPage() {
                         </a>
                       )}
                       {step.status === "active" && (
-                        <Link href="/dashboard/training"
-                          className="mt-3 inline-flex items-center gap-1.5 bg-primary text-white text-xs font-bold rounded-xl px-4 py-2 transition active:scale-95 hover:bg-primary-dark">
-                          <Zap size={12} />{tx(t.plans.resume, lang)}
-                        </Link>
+                        <button
+                          onClick={markStepDone}
+                          disabled={marking}
+                          className="mt-3 inline-flex items-center gap-1.5 bg-primary text-white text-xs font-bold rounded-xl px-4 py-2.5 transition active:scale-95 hover:bg-primary-dark disabled:opacity-50">
+                          <CheckCircle2 size={13} />
+                          {marking
+                            ? (isRTL ? "جاري الحفظ..." : "Saving...")
+                            : (isRTL ? "تم — التالي ←" : "Done — Next →")}
+                        </button>
                       )}
                     </div>
                   </div>
@@ -368,15 +430,6 @@ export default function PlansPage() {
         </div>
       )}
 
-      {/* Sticky CTA — only shown when a plan is open and has an active step */}
-      {displayPlan && activeStep && (
-        <div className="fixed bottom-4 inset-x-0 md:right-64 px-6 md:px-8 z-40 pointer-events-none">
-          <Link href="/dashboard/training"
-            className="w-full max-w-5xl mx-auto pointer-events-auto py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm shadow-xl shadow-primary/30 flex items-center justify-center gap-2 transition hover:bg-primary-dark active:scale-[0.98]">
-            <Zap size={15} />{tx(t.plans.nextStep, lang)} {isRTL ? activeStep.titleAr : activeStep.titleEn}
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
