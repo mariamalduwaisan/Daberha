@@ -18,15 +18,15 @@ const FEATURED = [
   { id: "boubyan-culture", title: "Boubyan Bank Culture", descAr: "فيديو: كيف يختلف بنك بوبيان؟",                                                         descEn: "Video: What makes Boubyan Bank different?",                                               type: "video", bg: "bg-primary"    },
 ];
 
-type Resource = { id: string; titleAr: string; titleEn: string; type: "pdf" | "video" | "article" | "data"; metaAr: string; metaEn: string; action: "download" | "external" };
+type Resource = { id: string; titleAr: string; titleEn: string; type: "pdf" | "video" | "article" | "data"; metaAr: string; metaEn: string; action: "download" | "external"; url: string };
 
 const RESOURCES: Resource[] = [
-  { id: "1", titleAr: "أساسيات الخدمات المصرفية الإسلامية", titleEn: "Islamic Banking Basics",           type: "pdf",     metaAr: "PDF • 2.4 MB • 15 صفحة",  metaEn: "PDF • 2.4 MB • 15 pages",   action: "download" },
-  { id: "2", titleAr: "التعامل مع الأسئلة الصعبة",           titleEn: "Handling Tough Questions",        type: "video",   metaAr: "فيديو • 12 دقيقة • HD",   metaEn: "Video • 12 min • HD",        action: "external" },
-  { id: "3", titleAr: "أسرار لغة الجسد في المقابلات",        titleEn: "Body Language Secrets",           type: "article", metaAr: "مقال • قراءة 5 دقائق",     metaEn: "Article • 5 min read",       action: "external" },
-  { id: "4", titleAr: "نماذج الاختبارات الفنية لـ KFH",       titleEn: "KFH Technical Test Samples",     type: "data",    metaAr: "PDF • 1.1 MB • 8 صفحات",  metaEn: "PDF • 1.1 MB • 8 pages",    action: "download" },
-  { id: "5", titleAr: "مصطلحات الخدمات المصرفية الأساسية",   titleEn: "Essential Banking Terminology",   type: "article", metaAr: "مقال • قراءة 7 دقائق",     metaEn: "Article • 7 min read",       action: "external" },
-  { id: "6", titleAr: "دليل مقابلات بنك الخليج",             titleEn: "Gulf Bank Interview Guide",       type: "pdf",     metaAr: "PDF • 1.8 MB • 12 صفحة",  metaEn: "PDF • 1.8 MB • 12 pages",   action: "download" },
+  { id: "1", titleAr: "أساسيات الخدمات المصرفية الإسلامية", titleEn: "Islamic Banking Basics",         type: "pdf",     metaAr: "PDF • 2.4 MB • 15 صفحة",  metaEn: "PDF • 2.4 MB • 15 pages",  action: "external", url: "https://en.wikipedia.org/wiki/Islamic_banking_and_finance" },
+  { id: "2", titleAr: "التعامل مع الأسئلة الصعبة",           titleEn: "Handling Tough Questions",      type: "video",   metaAr: "فيديو • 12 دقيقة • HD",   metaEn: "Video • 12 min • HD",       action: "external", url: "https://www.youtube.com/results?search_query=tough+interview+questions+banking" },
+  { id: "3", titleAr: "أسرار لغة الجسد في المقابلات",        titleEn: "Body Language in Interviews",   type: "article", metaAr: "مقال • قراءة 5 دقائق",     metaEn: "Article • 5 min read",      action: "external", url: "https://www.indeed.com/career-advice/interviewing/body-language-tips-for-your-next-interview" },
+  { id: "4", titleAr: "نماذج الاختبارات الفنية لـ KFH",       titleEn: "KFH Technical Test Samples",   type: "data",    metaAr: "PDF • 1.1 MB • 8 صفحات",  metaEn: "PDF • 1.1 MB • 8 pages",   action: "external", url: "https://www.kfh.com/en/home/about/careers.html" },
+  { id: "5", titleAr: "مصطلحات الخدمات المصرفية الأساسية",   titleEn: "Essential Banking Terminology", type: "article", metaAr: "مقال • قراءة 7 دقائق",     metaEn: "Article • 7 min read",      action: "external", url: "https://www.investopedia.com/financial-term-dictionary-4769738" },
+  { id: "6", titleAr: "دليل مقابلات بنك الخليج",             titleEn: "Gulf Bank Interview Guide",     type: "pdf",     metaAr: "PDF • 1.8 MB • 12 صفحة",  metaEn: "PDF • 1.8 MB • 12 pages",  action: "external", url: "https://www.gulfbank.com.kw/en/about-us/careers" },
 ];
 
 const TYPE_STYLE: Record<string, { bg: string; icon: React.ReactNode }> = {
@@ -165,11 +165,11 @@ export default function MaterialsPage() {
                   const title = isRTL ? r.titleAr : r.titleEn;
                   const meta  = isRTL ? r.metaAr  : r.metaEn;
                   return (
-                    <div key={r.id} className="bg-surface rounded-2xl px-4 py-3.5 flex items-center gap-3.5">
-                      <button aria-label={r.action}
-                        className="w-8 h-8 rounded-full bg-gray-50 border border-border flex items-center justify-center text-muted shrink-0 transition active:scale-95 hover:text-primary">
+                    <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
+                      className="bg-surface rounded-2xl px-4 py-3.5 flex items-center gap-3.5 hover:bg-gray-50 transition active:scale-[0.98] cursor-pointer">
+                      <div className="w-8 h-8 rounded-full bg-gray-50 border border-border flex items-center justify-center text-muted shrink-0">
                         {r.action === "download" ? <Download size={14} /> : <ExternalLink size={14} />}
-                      </button>
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-900 text-sm leading-snug">{title}</p>
                         <p className="text-xs text-muted mt-0.5">{meta}</p>
@@ -177,7 +177,7 @@ export default function MaterialsPage() {
                       <div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
                         {icon}
                       </div>
-                    </div>
+                    </a>
                   );
                 })}
               </div>
