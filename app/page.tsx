@@ -15,6 +15,14 @@ function SignInInner() {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
 
+  // Redirect already-logged-in users straight to the dashboard
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) window.location.replace("/dashboard");
+    });
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError("");
