@@ -47,8 +47,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    // A10: log internally, never expose error details to client
-    console.error("[chat] streamChat error:", err);
-    return NextResponse.json({ error: "Service temporarily unavailable" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "Service unavailable";
+    console.error("[chat] streamChat error:", msg);
+    // Return the real error so the UI can display what's actually wrong
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
