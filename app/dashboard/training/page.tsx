@@ -4,23 +4,26 @@ import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ChatMessage from "@/components/ChatMessage";
 import { Bot, Sparkles, SendHorizonal } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { t, tx } from "@/lib/translations";
 
 type Message = { role: "user" | "assistant"; content: string };
 
-const STARTER_QUESTIONS = [
-  "ساعدني في التحضير لمقابلة NBK",
-  "اسألني أسئلة سلوكية شائعة",
-  "ما هي أساسيات الخدمات المصرفية الإسلامية؟",
-  "كيف أجيب بأسلوب STAR؟",
-];
-
 export default function TrainingPage() {
-  const [messages,   setMessages]   = useState<Message[]>([]);
-  const [input,      setInput]      = useState("");
-  const [loading,    setLoading]    = useState(false);
-  const [sessionId,  setSessionId]  = useState<string | null>(null);
+  const { lang, isRTL } = useLanguage();
+  const [messages,  setMessages]  = useState<Message[]>([]);
+  const [input,     setInput]     = useState("");
+  const [loading,   setLoading]   = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
+
+  const STARTERS = [
+    tx(t.training.starters.s1, lang),
+    tx(t.training.starters.s2, lang),
+    tx(t.training.starters.s3, lang),
+    tx(t.training.starters.s4, lang),
+  ];
 
   useEffect(() => {
     (async () => {
@@ -103,7 +106,7 @@ export default function TrainingPage() {
         }
       }
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "عذراً، حدث خطأ. يرجى المحاولة مجدداً." }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: tx(t.training.error, lang) }]);
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -111,16 +114,16 @@ export default function TrainingPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen md:h-[calc(100vh)] bg-neutral">
+    <div className="flex flex-col h-screen bg-neutral" dir={isRTL ? "rtl" : "ltr"}>
       {/* Top bar */}
       <div className="px-5 md:px-8 pt-10 pb-4 bg-surface border-b border-border shrink-0">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900">التدريب</h1>
-            <p className="text-muted text-xs">مقابلات تجريبية بالذكاء الاصطناعي</p>
+            <h1 className="text-xl font-extrabold text-gray-900">{tx(t.training.title, lang)}</h1>
+            <p className="text-muted text-xs">{tx(t.training.subtitle, lang)}</p>
           </div>
           <span className="flex items-center gap-1 text-xs font-semibold bg-primary/10 text-primary rounded-full px-3 py-1.5">
-            <Sparkles size={11} />ذكاء اصطناعي
+            <Sparkles size={11} />{tx(t.training.ai, lang)}
           </span>
         </div>
       </div>
@@ -133,14 +136,12 @@ export default function TrainingPage() {
               <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
                 <Bot size={30} className="text-primary" />
               </div>
-              <p className="font-extrabold text-gray-900 text-lg">مرحباً! أنا مساعدك الذكي</p>
-              <p className="text-muted text-sm mt-2 leading-relaxed max-w-sm mx-auto">
-                يمكنني مساعدتك في التحضير للمقابلات المصرفية. ابدأ بسؤال أو اختر من الأسئلة أدناه.
-              </p>
+              <p className="font-extrabold text-gray-900 text-lg">{tx(t.training.welcome, lang)}</p>
+              <p className="text-muted text-sm mt-2 leading-relaxed max-w-sm mx-auto">{tx(t.training.welcomeSub, lang)}</p>
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto">
-                {STARTER_QUESTIONS.map((q) => (
+                {STARTERS.map((q) => (
                   <button key={q} onClick={() => sendMessage(q)}
-                    className="text-right text-sm text-primary font-medium bg-primary/5 rounded-xl px-4 py-3 border border-primary/15 transition active:scale-95 hover:bg-primary/10">
+                    className={`text-sm text-primary font-medium bg-primary/5 rounded-xl px-4 py-3 border border-primary/15 transition active:scale-95 hover:bg-primary/10 ${isRTL ? "text-right" : "text-left"}`}>
                     {q}
                   </button>
                 ))}
@@ -168,8 +169,9 @@ export default function TrainingPage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="اكتب رسالتك..."
+            placeholder={tx(t.training.placeholder, lang)}
             disabled={loading}
+            dir={isRTL ? "rtl" : "ltr"}
             className="flex-1 px-4 py-3 rounded-xl border border-border bg-neutral text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition"
           />
           <button type="submit" disabled={!input.trim() || loading} aria-label="إرسال"

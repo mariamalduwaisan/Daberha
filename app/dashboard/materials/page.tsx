@@ -8,46 +8,26 @@ import {
   FileText, PlayCircle, BookOpen, BarChart2,
   Download, ExternalLink, Plus, Search, Image as ImageIcon,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { t, tx } from "@/lib/translations";
 
 type Upload = { id: string; file_name: string; public_url: string; upload_type: string };
 
 const FEATURED = [
-  {
-    id: "nbk-guide",
-    title: "NBK Interview Guide",
-    description: "دليل شامل للتحضير لمقابلات بنك الكويت الوطني، يغطي القيم والثقافة والأسئلة الشائعة.",
-    type: "pdf",
-    badge: "دليل مميز",
-    bg: "bg-[#0F1E3C]",
-  },
-  {
-    id: "boubyan-culture",
-    title: "ثقافة Boubyan",
-    description: "فيديو: كيف يختلف بنك بوبيان؟",
-    type: "video",
-    badge: "موصى به",
-    bg: "bg-primary",
-  },
+  { id: "nbk-guide",       title: "NBK Interview Guide",  descAr: "دليل شامل للتحضير لمقابلات بنك الكويت الوطني، يغطي القيم والثقافة والأسئلة الشائعة.", descEn: "Comprehensive NBK interview prep guide covering values, culture and common questions.", type: "pdf",   bg: "bg-[#0F1E3C]" },
+  { id: "boubyan-culture", title: "Boubyan Bank Culture", descAr: "فيديو: كيف يختلف بنك بوبيان؟",                                                         descEn: "Video: What makes Boubyan Bank different?",                                               type: "video", bg: "bg-primary"    },
 ];
 
-type Resource = {
-  id: string;
-  title: string;
-  type: "pdf" | "video" | "article" | "data";
-  meta: string;
-  action: "download" | "external";
-};
+type Resource = { id: string; titleAr: string; titleEn: string; type: "pdf" | "video" | "article" | "data"; metaAr: string; metaEn: string; action: "download" | "external" };
 
 const RESOURCES: Resource[] = [
-  { id: "1", title: "أساسيات الخدمات المصرفية الإسلامية", type: "pdf",     meta: "PDF • 2.4 MB • 15 صفحة",   action: "download" },
-  { id: "2", title: "التعامل مع الأسئلة الصعبة",           type: "video",   meta: "فيديو • 12 دقيقة • HD",    action: "external" },
-  { id: "3", title: "أسرار لغة الجسد في المقابلات",        type: "article", meta: "مقال • قراءة 5 دقائق",      action: "external" },
-  { id: "4", title: "نماذج الاختبارات الفنية لـ KFH",       type: "data",    meta: "PDF • 1.1 MB • 8 صفحات",   action: "download" },
-  { id: "5", title: "مصطلحات الخدمات المصرفية الأساسية",   type: "article", meta: "مقال • قراءة 7 دقائق",      action: "external" },
-  { id: "6", title: "دليل مقابلات بنك الخليج",             type: "pdf",     meta: "PDF • 1.8 MB • 12 صفحة",   action: "download" },
+  { id: "1", titleAr: "أساسيات الخدمات المصرفية الإسلامية", titleEn: "Islamic Banking Basics",           type: "pdf",     metaAr: "PDF • 2.4 MB • 15 صفحة",  metaEn: "PDF • 2.4 MB • 15 pages",   action: "download" },
+  { id: "2", titleAr: "التعامل مع الأسئلة الصعبة",           titleEn: "Handling Tough Questions",        type: "video",   metaAr: "فيديو • 12 دقيقة • HD",   metaEn: "Video • 12 min • HD",        action: "external" },
+  { id: "3", titleAr: "أسرار لغة الجسد في المقابلات",        titleEn: "Body Language Secrets",           type: "article", metaAr: "مقال • قراءة 5 دقائق",     metaEn: "Article • 5 min read",       action: "external" },
+  { id: "4", titleAr: "نماذج الاختبارات الفنية لـ KFH",       titleEn: "KFH Technical Test Samples",     type: "data",    metaAr: "PDF • 1.1 MB • 8 صفحات",  metaEn: "PDF • 1.1 MB • 8 pages",    action: "download" },
+  { id: "5", titleAr: "مصطلحات الخدمات المصرفية الأساسية",   titleEn: "Essential Banking Terminology",   type: "article", metaAr: "مقال • قراءة 7 دقائق",     metaEn: "Article • 7 min read",       action: "external" },
+  { id: "6", titleAr: "دليل مقابلات بنك الخليج",             titleEn: "Gulf Bank Interview Guide",       type: "pdf",     metaAr: "PDF • 1.8 MB • 12 صفحة",  metaEn: "PDF • 1.8 MB • 12 pages",   action: "download" },
 ];
-
-const FILTERS = ["الكل", "أساسيات البنوك", "الأسئلة السلوكية"];
 
 const TYPE_STYLE: Record<string, { bg: string; icon: React.ReactNode }> = {
   pdf:     { bg: "bg-rose-100",   icon: <FileText   size={18} className="text-rose-500"  /> },
@@ -57,11 +37,18 @@ const TYPE_STYLE: Record<string, { bg: string; icon: React.ReactNode }> = {
 };
 
 export default function MaterialsPage() {
-  const [filter,          setFilter]          = useState("الكل");
+  const { lang, isRTL } = useLanguage();
+  const [filter,          setFilter]          = useState(0);
   const [search,          setSearch]          = useState("");
   const [showImageUpload, setShowImageUpload] = useState(false);
   const [showDocUpload,   setShowDocUpload]   = useState(false);
   const [uploads,         setUploads]         = useState<Upload[]>([]);
+
+  const FILTERS = [
+    tx(t.materials.filters.all,         lang),
+    tx(t.materials.filters.banking,     lang),
+    tx(t.materials.filters.behavioural, lang),
+  ];
 
   useEffect(() => {
     const supabase = createClient();
@@ -77,27 +64,29 @@ export default function MaterialsPage() {
     });
   }, []);
 
-  const filtered = RESOURCES.filter((r) => !search || r.title.includes(search));
+  const filtered = RESOURCES.filter((r) => {
+    const title = isRTL ? r.titleAr : r.titleEn;
+    return !search || title.toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
-    <div className="flex flex-col min-h-screen bg-neutral pb-24 md:pb-8">
+    <div className="flex flex-col min-h-screen bg-neutral pb-24 md:pb-8" dir={isRTL ? "rtl" : "ltr"}>
       {/* Page header */}
-      <div className="px-5 md:px-8 pt-10 md:pt-10 pb-5 bg-surface border-b border-border">
+      <div className="px-5 md:px-8 pt-10 pb-5 bg-surface border-b border-border">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-xl font-extrabold text-gray-900">المصادر</h1>
-              <p className="text-muted text-sm mt-0.5">أدلة وفيديوهات ومقالات للتحضير</p>
+              <h1 className="text-xl font-extrabold text-gray-900">{tx(t.materials.title, lang)}</h1>
+              <p className="text-muted text-sm mt-0.5">{tx(t.materials.subtitle, lang)}</p>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowImageUpload(true)} aria-label="رفع صورة"
                 className="w-9 h-9 rounded-full bg-secondary/10 text-secondary flex items-center justify-center transition active:scale-95 hover:bg-secondary/20">
                 <ImageIcon size={16} />
               </button>
-              <button onClick={() => setShowDocUpload(true)} aria-label="رفع مستند"
+              <button onClick={() => setShowDocUpload(true)}
                 className="flex items-center gap-1.5 bg-primary text-white text-xs font-bold rounded-full px-4 py-2 transition active:scale-95 hover:bg-primary-dark">
-                <Plus size={14} />
-                رفع ملف
+                <Plus size={14} />{tx(t.materials.uploadFile, lang)}
               </button>
             </div>
           </div>
@@ -105,20 +94,18 @@ export default function MaterialsPage() {
           {/* Search + filters */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+              <Search size={15} className={`absolute ${isRTL ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 text-muted pointer-events-none`} />
               <input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="ابحث في المصادر"
-                className="w-full pr-9 pl-4 py-2.5 rounded-xl border border-border bg-neutral text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition"
+                type="search" value={search} onChange={(e) => setSearch(e.target.value)}
+                placeholder={tx(t.materials.search, lang)}
+                className={`w-full ${isRTL ? "pr-9 pl-4" : "pl-9 pr-4"} py-2.5 rounded-xl border border-border bg-neutral text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition`}
               />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              {FILTERS.map((f) => (
-                <button key={f} onClick={() => setFilter(f)}
+              {FILTERS.map((f, i) => (
+                <button key={f} onClick={() => setFilter(i)}
                   className={`shrink-0 text-xs font-bold rounded-full px-4 py-2 transition active:scale-95 ${
-                    filter === f ? "bg-primary text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    filter === i ? "bg-primary text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                   }`}>
                   {f}
                 </button>
@@ -131,25 +118,25 @@ export default function MaterialsPage() {
       <div className="px-5 md:px-8 py-6">
         <div className="max-w-5xl mx-auto space-y-8">
 
-          {/* Featured cards — 2-col grid on desktop */}
+          {/* Featured */}
           {!search && (
             <div>
-              <h2 className="font-extrabold text-gray-900 mb-4">مميز</h2>
+              <h2 className="font-extrabold text-gray-900 mb-4">{tx(t.materials.featured, lang)}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {FEATURED.map((item) => (
                   <div key={item.id}
                     className={`${item.bg} rounded-2xl p-5 min-h-[140px] flex flex-col justify-between overflow-hidden relative`}>
                     <div className="absolute inset-0 opacity-5 pointer-events-none"
-                      style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px)", backgroundSize: "24px 24px" }} />
+                      style={{ backgroundImage: "radial-gradient(rgba(255,255,255,.2) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
                     <span className="self-end text-[11px] font-bold bg-white/20 text-white rounded-full px-2.5 py-1 z-10">
-                      {item.badge}
+                      {isRTL ? tx(t.materials.badges.guide, lang) : tx(t.materials.badges.recommended, lang)}
                     </span>
                     <div className="z-10">
                       <h3 className="font-extrabold text-white text-base leading-snug">{item.title}</h3>
-                      <p className="text-xs text-white/70 mt-1 leading-relaxed">{item.description}</p>
+                      <p className="text-xs text-white/70 mt-1 leading-relaxed">{isRTL ? item.descAr : item.descEn}</p>
                       {item.type === "video" && (
                         <button className="mt-3 flex items-center gap-1.5 bg-white text-primary text-xs font-bold rounded-xl px-4 py-2 transition active:scale-95">
-                          <PlayCircle size={13} />شاهد الآن
+                          <PlayCircle size={13} />{tx(t.materials.watchNow, lang)}
                         </button>
                       )}
                     </div>
@@ -159,31 +146,33 @@ export default function MaterialsPage() {
             </div>
           )}
 
-          {/* Resource list — 2-col grid on desktop */}
+          {/* Resource list */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-extrabold text-gray-900">أحدث المصادر</h2>
-              <button className="text-xs text-primary font-bold transition active:scale-95">عرض الكل</button>
+              <h2 className="font-extrabold text-gray-900">{tx(t.materials.latest, lang)}</h2>
+              <button className="text-xs text-primary font-bold transition active:scale-95">{tx(t.materials.viewAll, lang)}</button>
             </div>
 
             {filtered.length === 0 ? (
               <div className="text-center py-16">
                 <BookOpen size={34} className="text-gray-200 mx-auto mb-3" />
-                <p className="text-muted text-sm font-medium">لا توجد نتائج لـ &quot;{search}&quot;</p>
+                <p className="text-muted text-sm font-medium">{tx(t.materials.noResults, lang)}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {filtered.map((r) => {
                   const { bg, icon } = TYPE_STYLE[r.type] ?? TYPE_STYLE.article;
+                  const title = isRTL ? r.titleAr : r.titleEn;
+                  const meta  = isRTL ? r.metaAr  : r.metaEn;
                   return (
                     <div key={r.id} className="bg-surface rounded-2xl px-4 py-3.5 flex items-center gap-3.5">
-                      <button aria-label={r.action === "download" ? "تحميل" : "فتح"}
+                      <button aria-label={r.action}
                         className="w-8 h-8 rounded-full bg-gray-50 border border-border flex items-center justify-center text-muted shrink-0 transition active:scale-95 hover:text-primary">
                         {r.action === "download" ? <Download size={14} /> : <ExternalLink size={14} />}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-gray-900 text-sm leading-snug">{r.title}</p>
-                        <p className="text-xs text-muted mt-0.5">{r.meta}</p>
+                        <p className="font-bold text-gray-900 text-sm leading-snug">{title}</p>
+                        <p className="text-xs text-muted mt-0.5">{meta}</p>
                       </div>
                       <div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
                         {icon}
@@ -198,7 +187,7 @@ export default function MaterialsPage() {
           {/* User uploads */}
           {uploads.length > 0 && (
             <div>
-              <h2 className="font-extrabold text-gray-900 mb-4">رفوعاتك</h2>
+              <h2 className="font-extrabold text-gray-900 mb-4">{tx(t.materials.uploads, lang)}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {uploads.map((u) => {
                   const isImage = u.upload_type === "image";
