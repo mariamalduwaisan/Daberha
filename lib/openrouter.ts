@@ -38,11 +38,15 @@ export async function streamChat(messages: Message[]): Promise<ReadableStream<Ui
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      "HTTP-Referer": "https://daberha.vercel.app",
       "X-Title": "دبرها – مساعد المقابلات",
     },
     body: JSON.stringify({
-      model: "meta-llama/llama-3.3-70b-instruct:free",
+      models: [
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "google/gemma-3-27b-it:free",
+        "mistralai/mistral-7b-instruct:free",
+      ],
       messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
       stream: true,
     }),
