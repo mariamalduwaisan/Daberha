@@ -321,21 +321,50 @@ export default function TrainingPage() {
                 {tx(t.training.welcomeSub, lang)}
               </p>
 
-              {/* Hint chips */}
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {supported && (
-                  <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-xl px-4 py-2.5 text-xs text-primary font-semibold">
-                    <Mic size={13} />
-                    {isRTL ? "جرّب وضع الصوت — تحدّث بصوت عالٍ" : "Try voice mode — speak aloud"}
+              {/* Upload CV / portfolio card */}
+              <div className="mt-6 max-w-sm mx-auto">
+                <div className="bg-surface border-2 border-dashed border-border rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Paperclip size={18} className="text-primary" />
+                    </div>
+                    <div className={isRTL ? "text-right" : "text-left"}>
+                      <p className="text-sm font-extrabold text-gray-900">
+                        {isRTL ? "ارفع سيرتك الذاتية أو ملف شخصي" : "Upload your CV or portfolio"}
+                      </p>
+                      <p className="text-xs text-muted mt-0.5">
+                        {isRTL ? "سيطرح عليك المساعد أسئلة مقابلة مبنية عليها" : "The AI will run a mock interview based on it"}
+                      </p>
+                    </div>
                   </div>
-                )}
-                <div className="inline-flex items-center gap-2 bg-surface border border-border rounded-xl px-4 py-2.5 text-xs text-muted font-semibold">
-                  <Paperclip size={13} />
-                  {isRTL ? "ارفع سيرتك الذاتية للتدريب عليها" : "Upload your CV to practise with it"}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowDocUpload(true)}
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-primary text-white text-xs font-bold rounded-xl py-2.5 transition hover:bg-primary-dark active:scale-95">
+                      <FileText size={13} />
+                      {isRTL ? "PDF / Word" : "PDF / Word"}
+                    </button>
+                    <button
+                      onClick={() => setShowImgUpload(true)}
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-surface border border-border text-gray-900 text-xs font-bold rounded-xl py-2.5 transition hover:border-primary hover:text-primary active:scale-95">
+                      <ImageIcon size={13} />
+                      {isRTL ? "صورة" : "Image"}
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto">
+              {/* Voice hint */}
+              {supported && (
+                <div className="mt-3 flex justify-center">
+                  <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-xl px-4 py-2 text-xs text-primary font-semibold">
+                    <Mic size={12} />
+                    {isRTL ? "جرّب وضع الصوت — تحدّث بصوت عالٍ" : "Try voice mode — speak aloud"}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto">
                 {STARTERS.map((q) => (
                   <button key={q} onClick={() => sendMessage(q)}
                     className={`text-sm text-primary font-medium bg-primary/5 rounded-xl px-4 py-3 border border-primary/15 transition active:scale-95 hover:bg-primary/10 ${isRTL ? "text-right" : "text-left"}`}>
