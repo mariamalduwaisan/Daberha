@@ -57,7 +57,7 @@ export async function streamChat(messages: Message[]): Promise<ReadableStream<Ui
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       "HTTP-Referer": "https://daberha.vercel.app",
-      "X-Title": "دبرها – مساعد المقابلات",
+      "X-Title": "Daberha - Interview Assistant",
     },
     body: JSON.stringify({
       // 'models' array = OpenRouter fallback chain — tries each in order
@@ -95,7 +95,7 @@ export async function generateContent(prompt: string): Promise<string> {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       "HTTP-Referer": "https://daberha.vercel.app",
-      "X-Title": "دبرها – مساعد المقابلات",
+      "X-Title": "Daberha - Interview Assistant",
     },
     body: JSON.stringify({
       model: "meta-llama/llama-3.3-70b-instruct:free",
