@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Mic2, TrendingUp, BarChart2 } from "lucide-react";
+import { Mic2, TrendingUp, BarChart2, ChevronLeft, Star } from "lucide-react";
 
 export default async function HistoryPage() {
   const supabase = await createClient();
@@ -18,48 +18,62 @@ export default async function HistoryPage() {
     ? Math.round(withScores.reduce((sum, s) => sum + s.score, 0) / withScores.length)
     : null;
 
+  const totalSessions = sessions?.length ?? 0;
+  const bestScore = withScores.length
+    ? Math.max(...withScores.map((s) => s.score))
+    : null;
+
   return (
     <div className="flex flex-col min-h-screen bg-neutral pb-24">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 bg-surface border-b border-border">
+      <div className="px-5 pt-12 pb-5 bg-surface border-b border-border">
         <h1 className="text-xl font-extrabold text-gray-900">السجل</h1>
         <p className="text-muted text-sm mt-0.5">جلساتك التدريبية السابقة</p>
       </div>
 
-      <div className="px-5 py-6 space-y-5">
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-surface rounded-2xl p-4 border border-border text-center">
-            <div className="flex items-center justify-center gap-1.5 mb-2">
-              <TrendingUp size={14} className="text-primary" />
-              <span className="text-[11px] text-muted font-medium">متوسط الدرجة</span>
+      <div className="px-5 py-5 space-y-5">
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-surface rounded-2xl p-3.5 text-center">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <BarChart2 size={15} className="text-primary" />
             </div>
-            <p className="text-3xl font-extrabold text-primary">
+            <p className="text-2xl font-extrabold text-gray-900">{totalSessions}</p>
+            <p className="text-[10px] text-muted mt-0.5 leading-tight">الجلسات</p>
+          </div>
+          <div className="bg-surface rounded-2xl p-3.5 text-center">
+            <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-2">
+              <TrendingUp size={15} className="text-secondary" />
+            </div>
+            <p className="text-2xl font-extrabold text-gray-900">
               {avgScore != null ? `${avgScore}%` : "—"}
             </p>
+            <p className="text-[10px] text-muted mt-0.5 leading-tight">متوسط الدرجة</p>
           </div>
-          <div className="bg-surface rounded-2xl p-4 border border-border text-center">
-            <div className="flex items-center justify-center gap-1.5 mb-2">
-              <BarChart2 size={14} className="text-secondary" />
-              <span className="text-[11px] text-muted font-medium">إجمالي الجلسات</span>
+          <div className="bg-surface rounded-2xl p-3.5 text-center">
+            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
+              <Star size={15} className="text-amber-500" />
             </div>
-            <p className="text-3xl font-extrabold text-secondary">
-              {sessions?.length ?? 0}
+            <p className="text-2xl font-extrabold text-gray-900">
+              {bestScore != null ? `${bestScore}%` : "—"}
             </p>
+            <p className="text-[10px] text-muted mt-0.5 leading-tight">أفضل درجة</p>
           </div>
         </div>
 
         {/* Sessions list */}
         <div>
-          <h2 className="font-bold text-gray-900 mb-3">الجلسات السابقة</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-extrabold text-gray-900">الجلسات السابقة</h2>
+          </div>
 
           {!sessions?.length ? (
-            <div className="bg-surface rounded-2xl border border-border p-8 text-center">
+            <div className="bg-surface rounded-2xl p-8 text-center">
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Mic2 size={26} className="text-primary" />
               </div>
-              <p className="font-semibold text-gray-900">لا توجد جلسات بعد</p>
-              <p className="text-muted text-sm mt-1 leading-relaxed">
+              <p className="font-extrabold text-gray-900">لا توجد جلسات بعد</p>
+              <p className="text-muted text-sm mt-1 leading-relaxed max-w-xs mx-auto">
                 ابدأ مقابلة تجريبية لترى نتائجك هنا
               </p>
               <Link
@@ -70,38 +84,47 @@ export default async function HistoryPage() {
               </Link>
             </div>
           ) : (
-            <div className="space-y-3">
-              {sessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="bg-surface rounded-2xl border border-border p-4 flex items-center gap-3"
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Mic2 size={18} className="text-primary" />
+            <div className="space-y-1">
+              {sessions.map((session) => {
+                const scoreColor =
+                  session.score == null    ? ""
+                  : session.score >= 80   ? "text-emerald-500"
+                  : session.score >= 60   ? "text-amber-500"
+                  :                        "text-red-500";
+
+                return (
+                  <div
+                    key={session.id}
+                    className="bg-surface rounded-2xl px-4 py-3.5 flex items-center gap-3.5"
+                  >
+                    {/* Icon square */}
+                    <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Mic2 size={18} className="text-primary" />
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 text-sm truncate">{session.title}</p>
+                      <p className="text-xs text-muted mt-0.5">
+                        {new Date(session.created_at).toLocaleDateString("ar-KW", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+
+                    {/* Score / action */}
+                    {session.score != null ? (
+                      <span className={`text-base font-extrabold shrink-0 ${scoreColor}`}>
+                        {session.score}%
+                      </span>
+                    ) : (
+                      <ChevronLeft size={18} className="text-muted shrink-0" />
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm truncate">{session.title}</p>
-                    <p className="text-xs text-muted mt-0.5">
-                      {new Date(session.created_at).toLocaleDateString("ar-KW", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                  {session.score != null && (
-                    <span className={`text-lg font-extrabold shrink-0 ${
-                      session.score >= 80 ? "text-emerald-500" :
-                      session.score >= 60 ? "text-amber-500" : "text-red-500"
-                    }`}>
-                      {session.score}%
-                    </span>
-                  )}
-                  <span className="text-xs text-muted bg-gray-100 rounded-full px-2.5 py-1 shrink-0">
-                    مراجعة
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

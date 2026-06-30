@@ -16,6 +16,7 @@ html {
 }
 
 body {
+  font-family: var(--font-cairo), var(--font-tajawal), sans-serif;
   background-color: #F8FAFC;
   color: #111827;
   min-height: 100vh;
