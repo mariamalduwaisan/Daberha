@@ -134,9 +134,7 @@ export default function PlansPage() {
           const map: Record<string, number> = {};
           (data ?? []).forEach((a) => { if (a.resource_id) map[a.resource_id] = a.metadata?.progress ?? 0; });
           setProgressMap(map);
-          // Auto-select the most recent active plan from DB
-          const dbActive = PLANS.find((p) => (map[p.id] ?? 0) > 0);
-          if (dbActive) setSelectedPlanId(dbActive.id);
+          // Grid is always the landing — user picks plan explicitly each visit
         });
     });
   }, []);
@@ -314,7 +312,14 @@ export default function PlansPage() {
                       <plan.Icon size={18} className={plan.iconColor} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 text-sm">{isRTL ? plan.titleAr : plan.titleEn}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-bold text-gray-900 text-sm">{isRTL ? plan.titleAr : plan.titleEn}</p>
+                        {(progressMap[plan.id] ?? 0) > 0 && (
+                          <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                            {isRTL ? "بدأت" : "Started"}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted mt-0.5 truncate">{isRTL ? plan.descAr : plan.descEn}</p>
                       <p className="text-[11px] text-muted mt-0.5">{plan.unitCount} {tx(t.plans.units, lang)}</p>
                     </div>
@@ -343,7 +348,14 @@ export default function PlansPage() {
                       <plan.Icon size={18} className={plan.iconColor} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 text-sm">{isRTL ? plan.titleAr : plan.titleEn}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-bold text-gray-900 text-sm">{isRTL ? plan.titleAr : plan.titleEn}</p>
+                        {(progressMap[plan.id] ?? 0) > 0 && (
+                          <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                            {isRTL ? "بدأت" : "Started"}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted mt-0.5 truncate">{isRTL ? plan.descAr : plan.descEn}</p>
                       <p className="text-[11px] text-muted mt-0.5">{plan.unitCount} {tx(t.plans.units, lang)}</p>
                     </div>

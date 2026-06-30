@@ -209,8 +209,9 @@ export default function TrainingPage() {
           });
         }
       }
-    } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: tx(t.training.error, lang) }]);
+    } catch (err) {
+      const errText = err instanceof Error ? err.message : String(err);
+      setMessages((prev) => [...prev, { role: "assistant", content: `❌ ${errText}` }]);
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -289,8 +290,9 @@ export default function TrainingPage() {
           } catch {}
         }
       }
-    } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: tx(t.training.error, lang) }]);
+    } catch (err) {
+      const errText = err instanceof Error ? err.message : String(err);
+      setMessages((prev) => [...prev, { role: "assistant", content: `❌ ${errText}` }]);
     } finally {
       setLoading(false);
     }
