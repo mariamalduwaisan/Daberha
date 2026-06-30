@@ -18,6 +18,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid messages" }, { status: 400 });
   }
 
+  // Block prompt injection / jailbreak attempts at the server level
+  const JAILBREAK_PATTERNS = [
+    /ignore (previous|all|prior|above|your) (instructions?|prompt|rules?|constraints?)/i,
+    /forget (everything|all|your instructions?|your rules?)/i,
+    /you are now/i,
+    /pretend (you are|to be|you're)/i,
+    /act as (a |an )?(different|new|unrestricted|free|evil|dan|jailbreak)/i,
+    /\[?(system|developer|admin|root|owner)\]?\s*:/i,
+    /override (your )?(system|instructions?|rules?|prompt)/i,
+    /reveal (your )?(system prompt|instructions?|rules?|source code)/i,
+    /what (is|are) your (instructions?|system prompt|rules?)/i,
+    /disregard (your )?(previous|all|prior)/i,
+  ];
+
+  const lastUserMessage = [...messages].reverse().find((m: { role: string }) => m.role === "user");
+  if (lastUserMessage) {
+    const content = String((lastUserMessage as { content: string }).content);
+    if (JAILBREAK_PATTERNS.some((p) => p.test(content))) {
+      return NextResponse.json(
+        { error: "لا يمكنني تغيير دوري. أنا هنا فقط للمساعدة في التحضير للمقابلات الوظيفية." },
+        { status: 400 }
+      );
+    }
+  }
+
   // A01: verify session ownership before trusting sessionId
   if (sessionId) {
     const { data: session } = await supabase
