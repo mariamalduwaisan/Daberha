@@ -68,10 +68,10 @@ export default function TrainingPage() {
       });
 
       if (!response.ok) {
-        const { error } = await response.json().catch(() => ({ error: "خطأ غير معروف" }));
+        const { error } = await response.json().catch(() => ({ error: "خطأ" }));
         throw new Error(error);
       }
-      if (!response.body) throw new Error("No response body");
+      if (!response.body) throw new Error("No body");
 
       const reader  = response.body.getReader();
       const decoder = new TextDecoder();
@@ -114,25 +114,13 @@ export default function TrainingPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-neutral" dir={isRTL ? "rtl" : "ltr"}>
-      {/* Top bar */}
-      <div className="px-5 md:px-8 pt-10 pb-4 bg-surface border-b border-border shrink-0">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-extrabold text-gray-900">{tx(t.training.title, lang)}</h1>
-            <p className="text-muted text-xs">{tx(t.training.subtitle, lang)}</p>
-          </div>
-          <span className="flex items-center gap-1 text-xs font-semibold bg-primary/10 text-primary rounded-full px-3 py-1.5">
-            <Sparkles size={11} />{tx(t.training.ai, lang)}
-          </span>
-        </div>
-      </div>
+    <div className="flex flex-col bg-neutral" style={{ height: "calc(100vh - 64px)" }} dir={isRTL ? "rtl" : "ltr"}>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 md:px-8 py-5 no-scrollbar">
+      <div className="flex-1 overflow-y-auto px-5 md:px-8 py-6 no-scrollbar">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
-            <div className="text-center pt-8">
+            <div className="text-center pt-10">
               <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
                 <Bot size={30} className="text-primary" />
               </div>
@@ -161,7 +149,7 @@ export default function TrainingPage() {
       </div>
 
       {/* Input */}
-      <div className="px-5 md:px-8 py-4 bg-surface border-t border-border shrink-0 mb-16 md:mb-0">
+      <div className="px-5 md:px-8 py-4 bg-surface border-t border-border shrink-0">
         <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
           className="max-w-3xl mx-auto flex gap-2 items-center">
           <input
@@ -174,9 +162,9 @@ export default function TrainingPage() {
             dir={isRTL ? "rtl" : "ltr"}
             className="flex-1 px-4 py-3 rounded-xl border border-border bg-neutral text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition"
           />
-          <button type="submit" disabled={!input.trim() || loading} aria-label="إرسال"
-            className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center disabled:opacity-40 transition active:scale-95 shrink-0">
-            <SendHorizonal size={20} />
+          <button type="submit" disabled={!input.trim() || loading}
+            className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center disabled:opacity-40 transition active:scale-95 shrink-0">
+            <SendHorizonal size={18} />
           </button>
         </form>
       </div>
