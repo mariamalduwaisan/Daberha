@@ -1,21 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Clock, Map, BookOpen, Mic2, LogOut } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { House, Mic2, Map, BookOpen, Clock, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 const tabs = [
-  { href: "/dashboard/training", label: "تدريب",    Icon: Mic2     },
-  { href: "/dashboard/plans",    label: "الخطط",    Icon: Map      },
-  { href: "/dashboard/materials",label: "المصادر",  Icon: BookOpen },
-  { href: "/dashboard/history",  label: "السجل",    Icon: Clock    },
+  { href: "/dashboard",           label: "الرئيسية", Icon: House,    exact: true  },
+  { href: "/dashboard/training",  label: "تدريب",    Icon: Mic2,     exact: false },
+  { href: "/dashboard/plans",     label: "الخطط",    Icon: Map,      exact: false },
+  { href: "/dashboard/materials", label: "المصادر",  Icon: BookOpen, exact: false },
+  { href: "/dashboard/history",   label: "السجل",    Icon: Clock,    exact: false },
 ];
 
 export default function SideNav() {
   const pathname = usePathname();
   const router   = useRouter();
+
+  function isActive(href: string, exact: boolean) {
+    return exact ? pathname === href : pathname.startsWith(href);
+  }
 
   async function signOut() {
     const supabase = createClient();
@@ -24,7 +28,7 @@ export default function SideNav() {
   }
 
   return (
-    <aside className="fixed top-0 right-0 h-full w-64 bg-surface border-l border-border z-40 flex flex-col hidden md:flex">
+    <aside className="fixed top-0 right-0 h-full w-64 bg-surface border-l border-border z-40 flex-col hidden md:flex">
       {/* Logo */}
       <div className="px-6 py-6 border-b border-border">
         <div className="flex items-center gap-3">
@@ -38,25 +42,22 @@ export default function SideNav() {
         </div>
       </div>
 
-      {/* Nav items */}
+      {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {tabs.map(({ href, label, Icon }) => {
-          const isActive = pathname.startsWith(href);
+        {tabs.map(({ href, label, Icon, exact }) => {
+          const active = isActive(href, exact);
           return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              <Icon size={19} strokeWidth={isActive ? 2.5 : 1.8} />
+            <Link key={href} href={href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors group ${
+                active ? "bg-primary/10 text-primary" : "text-muted hover:bg-gray-50 hover:text-gray-900"
+              }`}>
+              <Icon
+                size={19}
+                strokeWidth={active ? 2.5 : 1.8}
+                className={`transition-transform duration-200 ${active ? "scale-110" : "group-hover:scale-105"}`}
+              />
               <span className="font-semibold text-sm">{label}</span>
-              {isActive && (
-                <span className="mr-auto w-1.5 h-1.5 rounded-full bg-primary" />
-              )}
+              {active && <span className="mr-auto w-1.5 h-1.5 rounded-full bg-primary" />}
             </Link>
           );
         })}
@@ -64,11 +65,9 @@ export default function SideNav() {
 
       {/* Sign out */}
       <div className="px-3 py-4 border-t border-border">
-        <button
-          onClick={signOut}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-red-50 hover:text-red-500 transition-colors w-full"
-        >
-          <LogOut size={18} />
+        <button onClick={signOut}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-red-50 hover:text-red-500 transition-colors w-full group">
+          <LogOut size={18} className="transition-transform duration-200 group-hover:-translate-x-1" />
           <span className="font-semibold text-sm">تسجيل الخروج</span>
         </button>
       </div>
