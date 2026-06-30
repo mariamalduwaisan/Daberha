@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   CheckCircle2, Lock, Zap, BookOpen,
   Building2, Headphones, Users, TrendingUp,
   ChevronRight, ChevronLeft, Phone, Layers,
-  Truck, Shield, FileText, ExternalLink,
+  Truck, Shield, FileText, ExternalLink, ArrowLeft, ArrowRight,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -117,8 +118,10 @@ function StepIcon({ status }: { status: StepStatus }) {
 
 export default function PlansPage() {
   const { lang, isRTL } = useLanguage();
-  const [progressMap,  setProgressMap]  = useState<Record<string, number>>({});
-  const [activeGroup,  setActiveGroup]  = useState<"all" | PlanGroup>("all");
+  const [progressMap,    setProgressMap]    = useState<Record<string, number>>({});
+  const [activeGroup,    setActiveGroup]    = useState<"all" | PlanGroup>("all");
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [saving,         setSaving]         = useState(false);
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
@@ -131,44 +134,79 @@ export default function PlansPage() {
           const map: Record<string, number> = {};
           (data ?? []).forEach((a) => { if (a.resource_id) map[a.resource_id] = a.metadata?.progress ?? 0; });
           setProgressMap(map);
+          // Auto-select the most recent active plan from DB
+          const dbActive = PLANS.find((p) => (map[p.id] ?? 0) > 0);
+          if (dbActive) setSelectedPlanId(dbActive.id);
         });
     });
   }, []);
 
-  const activePlan = PLANS.find((p) => (progressMap[p.id] ?? 0) > 0) ?? null;
-  const steps      = activePlan ? (PLAN_STEPS[activePlan.id] ?? []) : [];
-  const activeStep = steps.find((s) => s.status === "active");
-  const doneCount  = steps.filter((s) => s.status === "done").length;
-  const Chevron    = isRTL ? ChevronLeft : ChevronRight;
+  async function selectPlan(planId: string) {
+    setSelectedPlanId(planId);
+    setSaving(true);
+    try {
+      const sb = createClient();
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        await sb.from("user_activity").insert({
+          user_id:       user.id,
+          activity_type: "plan_progress",
+          resource_id:   planId,
+          metadata:      { progress: 5 },
+        });
+        setProgressMap((prev) => ({ ...prev, [planId]: 5 }));
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const displayPlan = selectedPlanId ? (PLANS.find((p) => p.id === selectedPlanId) ?? null) : null;
+  const steps       = displayPlan ? (PLAN_STEPS[displayPlan.id] ?? []) : [];
+  const activeStep  = steps.find((s) => s.status === "active");
+  const doneCount   = steps.filter((s) => s.status === "done").length;
+  const Chevron     = isRTL ? ChevronLeft : ChevronRight;
+  const BackIcon    = isRTL ? ChevronRight : ChevronLeft;
 
   const displayedPlans = PLANS.filter((p) => activeGroup === "all" || p.group === activeGroup);
+
+  const BackArrow = isRTL ? ArrowRight : ArrowLeft;
 
   return (
     <div className="p-6 md:p-8 space-y-6" dir={isRTL ? "rtl" : "ltr"}>
 
-      {activePlan ? (
+      {displayPlan ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Steps — 2/3 */}
           <div className="lg:col-span-2 space-y-4">
 
-            {/* Active plan banner */}
-            <div className={`${activePlan.iconBg} rounded-2xl p-6 relative overflow-hidden`}>
+            {/* Back button + plan banner */}
+            <div className={`${displayPlan.iconBg} rounded-2xl p-6 relative overflow-hidden`}>
               <div className="absolute inset-0 opacity-5 pointer-events-none"
                 style={{ backgroundImage: "radial-gradient(rgba(255,255,255,.2) 1px,transparent 1px)", backgroundSize: "18px 18px" }} />
+              <button
+                onClick={() => setSelectedPlanId(null)}
+                className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs font-semibold mb-4 transition">
+                <BackArrow size={13} />
+                {isRTL ? "تغيير الخطة" : "Change plan"}
+              </button>
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="text-[11px] font-bold bg-white/20 text-white rounded-full px-2.5 py-1">{tx(t.plans.activePlan, lang)}</span>
-                  <h2 className="text-lg font-extrabold text-white mt-2">{isRTL ? activePlan.titleAr : activePlan.titleEn}</h2>
-                  <p className="text-xs text-white/60 mt-1">{isRTL ? activePlan.descAr : activePlan.descEn}</p>
+                  <span className="text-[11px] font-bold bg-white/20 text-white rounded-full px-2.5 py-1">
+                    {tx(t.plans.activePlan, lang)}
+                  </span>
+                  <h2 className="text-lg font-extrabold text-white mt-2">{isRTL ? displayPlan.titleAr : displayPlan.titleEn}</h2>
+                  <p className="text-xs text-white/60 mt-1">{isRTL ? displayPlan.descAr : displayPlan.descEn}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <span className="text-2xl font-extrabold text-white">{progressMap[activePlan.id] ?? 0}%</span>
+                  <span className="text-2xl font-extrabold text-white">{progressMap[displayPlan.id] ?? 0}%</span>
                   <p className="text-xs text-white/50 mt-0.5">{doneCount} {tx(t.plans.from, lang)} {steps.length}</p>
                 </div>
               </div>
               <div className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                <div className="h-full bg-white rounded-full transition-all" style={{ width: `${progressMap[activePlan.id] ?? 0}%` }} />
+                <div className="h-full bg-white rounded-full transition-all"
+                  style={{ width: `${progressMap[displayPlan.id] ?? 0}%` }} />
               </div>
             </div>
 
@@ -179,13 +217,21 @@ export default function PlansPage() {
               </div>
               <div className="divide-y divide-border">
                 {steps.map((step, idx) => (
-                  <div key={step.id} className={`flex items-start gap-4 px-6 py-4 ${step.status === "locked" ? "opacity-50" : ""}`}>
+                  <div key={step.id} className={`flex items-start gap-4 px-6 py-4 ${step.status === "locked" ? "opacity-40" : ""}`}>
                     <div className="mt-0.5 shrink-0"><StepIcon status={step.status} /></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <p className="text-sm font-bold text-gray-900">{idx + 1}. {isRTL ? step.titleAr : step.titleEn}</p>
-                        {step.status === "active" && <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">{tx(t.plans.status.active, lang)}</span>}
-                        {step.status === "done"   && <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 rounded-full px-2 py-0.5">{tx(t.plans.status.done, lang)}</span>}
+                        {step.status === "active" && (
+                          <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                            {tx(t.plans.status.active, lang)}
+                          </span>
+                        )}
+                        {step.status === "done" && (
+                          <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 rounded-full px-2 py-0.5">
+                            {tx(t.plans.status.done, lang)}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-muted">{isRTL ? step.descAr : step.descEn}</p>
                       {step.resourceUrl && (
@@ -197,9 +243,10 @@ export default function PlansPage() {
                         </a>
                       )}
                       {step.status === "active" && (
-                        <button className="mt-3 bg-primary text-white text-xs font-bold rounded-xl px-4 py-2 transition active:scale-95 hover:bg-primary-dark">
-                          {tx(t.plans.resume, lang)}
-                        </button>
+                        <Link href="/dashboard/training"
+                          className="mt-3 inline-flex items-center gap-1.5 bg-primary text-white text-xs font-bold rounded-xl px-4 py-2 transition active:scale-95 hover:bg-primary-dark">
+                          <Zap size={12} />{tx(t.plans.resume, lang)}
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -227,11 +274,11 @@ export default function PlansPage() {
         </div>
       ) : (
 
-        /* Plans selection */
+        /* ── Plans grid ── */
         <div className="space-y-6">
 
           {/* Group filter pills */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {(["all", "banking", "private"] as const).map((g) => {
               const label = g === "all"
                 ? (isRTL ? "الكل" : "All")
@@ -259,7 +306,10 @@ export default function PlansPage() {
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {displayedPlans.filter((p) => p.group === "banking").map((plan) => (
-                  <button key={plan.id} className="bg-surface rounded-2xl border border-border px-5 py-4 flex items-center gap-4 text-start hover:border-primary transition group w-full active:scale-[0.98]">
+                  <button key={plan.id}
+                    onClick={() => selectPlan(plan.id)}
+                    disabled={saving}
+                    className="bg-surface rounded-2xl border border-border px-5 py-4 flex items-center gap-4 text-start hover:border-primary hover:bg-primary/5 transition group w-full active:scale-[0.98] disabled:opacity-60">
                     <div className={`w-11 h-11 rounded-xl ${plan.iconBg} flex items-center justify-center shrink-0`}>
                       <plan.Icon size={18} className={plan.iconColor} />
                     </div>
@@ -285,7 +335,10 @@ export default function PlansPage() {
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {displayedPlans.filter((p) => p.group === "private").map((plan) => (
-                  <button key={plan.id} className="bg-surface rounded-2xl border border-border px-5 py-4 flex items-center gap-4 text-start hover:border-primary transition group w-full active:scale-[0.98]">
+                  <button key={plan.id}
+                    onClick={() => selectPlan(plan.id)}
+                    disabled={saving}
+                    className="bg-surface rounded-2xl border border-border px-5 py-4 flex items-center gap-4 text-start hover:border-primary hover:bg-primary/5 transition group w-full active:scale-[0.98] disabled:opacity-60">
                     <div className={`w-11 h-11 rounded-xl ${plan.iconBg} flex items-center justify-center shrink-0`}>
                       <plan.Icon size={18} className={plan.iconColor} />
                     </div>
@@ -303,12 +356,13 @@ export default function PlansPage() {
         </div>
       )}
 
-      {/* Sticky CTA */}
-      {activePlan && activeStep && (
+      {/* Sticky CTA — only shown when a plan is open and has an active step */}
+      {displayPlan && activeStep && (
         <div className="fixed bottom-4 inset-x-0 md:right-64 px-6 md:px-8 z-40 pointer-events-none">
-          <button className="w-full max-w-5xl mx-auto pointer-events-auto py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm shadow-xl shadow-primary/30 flex items-center justify-center gap-2 transition hover:bg-primary-dark active:scale-[0.98]">
+          <Link href="/dashboard/training"
+            className="w-full max-w-5xl mx-auto pointer-events-auto py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm shadow-xl shadow-primary/30 flex items-center justify-center gap-2 transition hover:bg-primary-dark active:scale-[0.98]">
             <Zap size={15} />{tx(t.plans.nextStep, lang)} {isRTL ? activeStep.titleAr : activeStep.titleEn}
-          </button>
+          </Link>
         </div>
       )}
     </div>
