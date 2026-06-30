@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CheckCircle2, Sparkles } from "lucide-react";
-import { t, tx, type Lang } from "@/lib/translations";
+import { t, tx } from "@/lib/translations";
 import LanguageToggle from "@/components/LanguageToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 
 function SignInInner() {
@@ -83,10 +84,14 @@ function SignInInner() {
             </div>
             <span className="font-extrabold text-gray-900">{tx(t.nav.appName, lang)}</span>
           </div>
-          <LanguageToggle />
+          <div className="flex gap-2">
+            <ThemeToggle />
+            <LanguageToggle />
+          </div>
         </div>
 
-        <div className="absolute top-4 left-4 hidden md:block">
+        <div className="absolute top-4 left-4 hidden md:flex gap-2">
+          <ThemeToggle />
           <LanguageToggle />
         </div>
 

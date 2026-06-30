@@ -1,24 +1,61 @@
 @import "tailwindcss";
 
+/* ── Design tokens (light defaults) ── */
 @theme {
-  --color-primary: #7C3AED;
-  --color-primary-dark: #6D28D9;
-  --color-secondary: #4A90E2;
-  --color-secondary-dark: #3A7BD5;
-  --color-neutral: #F8FAFC;
-  --color-surface: #FFFFFF;
-  --color-muted: #6B7280;
-  --color-border: #E5E7EB;
+  --color-primary:       #7C3AED;
+  --color-primary-dark:  #6D28D9;
+  --color-secondary:     #4A90E2;
+  --color-secondary-dark:#3A7BD5;
+  --color-neutral:       var(--neutral);
+  --color-surface:       var(--surface);
+  --color-muted:         var(--muted-fg);
+  --color-border:        var(--border-col);
 }
 
-html { direction: rtl; }
+/* ── Light mode (default) ── */
+:root {
+  --neutral:    #F8FAFC;
+  --surface:    #FFFFFF;
+  --muted-fg:   #6B7280;
+  --border-col: #E5E7EB;
+}
+
+/* ── Dark mode ── */
+html.dark {
+  --neutral:    #0A0E1A;
+  --surface:    #0F172A;
+  --muted-fg:   #9CA3AF;
+  --border-col: #1E2D45;
+
+  /* Override Tailwind's built-in gray scale */
+  --color-gray-50:  #0F172A;
+  --color-gray-100: #1E2D45;
+  --color-gray-200: #263347;
+  --color-gray-300: #374151;
+  --color-gray-400: #6B7280;
+  --color-gray-500: #9CA3AF;
+  --color-gray-600: #D1D5DB;
+  --color-gray-700: #E5E7EB;
+  --color-gray-800: #F3F4F6;
+  --color-gray-900: #F9FAFB;
+
+  /* Page background + text */
+  color-scheme: dark;
+  background-color: #0A0E1A;
+  color: #F9FAFB;
+}
+
+html, body {
+  min-height: 100vh;
+  direction: rtl;
+}
 
 body {
   font-family: var(--font-cairo), var(--font-tajawal), sans-serif;
-  background-color: #F8FAFC;
-  color: #111827;
-  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  background-color: var(--neutral);
+  color: var(--color-gray-900, #111827);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 * { box-sizing: border-box; }
@@ -45,17 +82,12 @@ body {
   to   { opacity: 1; transform: scale(1); }
 }
 @keyframes pulse-ring {
-  0%   { transform: scale(1);    opacity: 0.6; }
-  100% { transform: scale(1.6);  opacity: 0; }
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position:  200% center; }
-}
-@keyframes bounce-icon {
-  0%, 100% { transform: translateY(0); }
-  40%       { transform: translateY(-6px); }
-  60%       { transform: translateY(-3px); }
 }
 @keyframes spin-slow {
   from { transform: rotate(0deg); }
@@ -69,7 +101,6 @@ body {
 .animate-pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
 .animate-spin-slow  { animation: spin-slow 8s linear infinite; }
 
-/* stagger helpers */
 .delay-75  { animation-delay: 75ms; }
 .delay-150 { animation-delay: 150ms; }
 .delay-225 { animation-delay: 225ms; }
@@ -77,9 +108,14 @@ body {
 .delay-375 { animation-delay: 375ms; }
 .delay-450 { animation-delay: 450ms; }
 
-/* shimmer skeleton */
+/* Shimmer — light */
 .shimmer {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% auto;
   animation: shimmer 1.4s linear infinite;
+}
+/* Shimmer — dark */
+html.dark .shimmer {
+  background: linear-gradient(90deg, #1E2D45 25%, #263347 50%, #1E2D45 75%);
+  background-size: 200% auto;
 }

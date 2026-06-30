@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t, tx } from "@/lib/translations";
 import LanguageToggle from "@/components/LanguageToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function SideNav() {
   const pathname = usePathname();
@@ -65,10 +66,11 @@ export default function SideNav() {
         })}
       </nav>
 
-      {/* Bottom: lang toggle + sign out */}
+      {/* Bottom: toggles + sign out */}
       <div className="px-3 py-4 border-t border-white/5 space-y-1">
-        <div className="px-4 py-2">
-          <LanguageToggle className="w-full justify-center bg-white/5 border-white/10 text-white/60 hover:text-primary hover:border-primary" />
+        <div className="px-4 py-2 flex gap-2">
+          <LanguageToggle className="flex-1 justify-center bg-white/5 border-white/10 text-white/60 hover:text-primary hover:border-primary" />
+          <ThemeToggle className="flex-1 justify-center bg-white/5 border-white/10 text-white/60 hover:text-primary hover:border-primary" />
         </div>
         <button onClick={signOut}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/40 hover:bg-red-900/20 hover:text-red-400 transition-all w-full group">

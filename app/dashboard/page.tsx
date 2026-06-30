@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t, tx } from "@/lib/translations";
 import LanguageToggle from "@/components/LanguageToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type Session = { id: string; title: string; created_at: string; score: number | null };
 
@@ -72,7 +73,10 @@ export default function DashboardHome() {
               </div>
               <span className="text-white font-extrabold text-base">{tx(t.nav.appName, lang)}</span>
             </div>
-            <LanguageToggle className="bg-white/5 border-white/10 text-white/60 hover:text-primary hover:border-primary" />
+            <div className="flex gap-2">
+              <ThemeToggle className="bg-white/5 border-white/10 text-white/60 hover:text-primary hover:border-primary" />
+              <LanguageToggle className="bg-white/5 border-white/10 text-white/60 hover:text-primary hover:border-primary" />
+            </div>
           </div>
 
           {/* greeting */}
