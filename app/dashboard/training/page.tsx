@@ -3,7 +3,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ChatMessage from "@/components/ChatMessage";
-import { Bot, SendHorizonal, Mic, MicOff, Sparkles, Volume2 } from "lucide-react";
+import DocumentUpload from "@/components/DocumentUpload";
+import ImageUpload from "@/components/ImageUpload";
+import { Bot, SendHorizonal, Mic, MicOff, Volume2, Paperclip, FileText, Image as ImageIcon, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t, tx } from "@/lib/translations";
 import { useSpeechRecognition, type SpeechMeta } from "@/hooks/useSpeechRecognition";
@@ -11,8 +13,11 @@ import { useSpeechRecognition, type SpeechMeta } from "@/hooks/useSpeechRecognit
 type Message = {
   role: "user" | "assistant";
   content: string;
-  meta?: SpeechMeta;      // only for voice messages
+  meta?: SpeechMeta;
   isVoice?: boolean;
+  fileUrl?: string;
+  fileName?: string;
+  fileKind?: "document" | "image";
 };
 
 function ConfidenceBadge({ meta, isRTL }: { meta: SpeechMeta; isRTL: boolean }) {
@@ -49,13 +54,44 @@ function ConfidenceBadge({ meta, isRTL }: { meta: SpeechMeta; isRTL: boolean }) 
   );
 }
 
+function FileCard({ msg, isRTL }: { msg: Message; isRTL: boolean }) {
+  const isImage = msg.fileKind === "image";
+  return (
+    <div className={`flex ${isRTL ? "justify-start" : "justify-end"}`}>
+      <div className="bg-surface border border-border rounded-2xl px-4 py-3 flex items-center gap-3 max-w-[260px] shadow-sm">
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isImage ? "bg-secondary/10" : "bg-primary/10"}`}>
+          {isImage
+            ? <ImageIcon size={15} className="text-secondary" />
+            : <FileText  size={15} className="text-primary"   />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-gray-900 truncate">{msg.fileName}</p>
+          <p className="text-[10px] text-muted mt-0.5">
+            {isImage
+              ? (isRTL ? "صورة مرفوعة" : "Image uploaded")
+              : (isRTL ? "مستند مرفوع" : "Document uploaded")}
+          </p>
+        </div>
+        {msg.fileUrl && (
+          <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-primary transition shrink-0">
+            <ExternalLink size={13} />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function TrainingPage() {
   const { lang, isRTL } = useLanguage();
-  const [messages,   setMessages]   = useState<Message[]>([]);
-  const [input,      setInput]      = useState("");
-  const [loading,    setLoading]    = useState(false);
-  const [sessionId,  setSessionId]  = useState<string | null>(null);
-  const [voiceMode,  setVoiceMode]  = useState(false);
+  const [messages,       setMessages]       = useState<Message[]>([]);
+  const [input,          setInput]          = useState("");
+  const [loading,        setLoading]        = useState(false);
+  const [sessionId,      setSessionId]      = useState<string | null>(null);
+  const [voiceMode,      setVoiceMode]      = useState(false);
+  const [showDocUpload,  setShowDocUpload]  = useState(false);
+  const [showImgUpload,  setShowImgUpload]  = useState(false);
+  const [showFilePicker, setShowFilePicker] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
 
@@ -181,6 +217,85 @@ export default function TrainingPage() {
     }
   }
 
+  function handleFileUploaded(upload: { file_name: string; public_url: string; upload_type: string }) {
+    setShowDocUpload(false);
+    setShowImgUpload(false);
+    setShowFilePicker(false);
+
+    const fileKind: "document" | "image" = upload.upload_type === "image" ? "image" : "document";
+    const aiPrompt = fileKind === "image"
+      ? `[صورة مرفوعة: ${upload.file_name}]\nرفعت صورة كجزء من التحضير للمقابلة. اسألني أسئلة مقابلة مناسبة لوظيفة في القطاع المصرفي.`
+      : `[مستند مرفوع: ${upload.file_name}]\nرفعت سيرتي الذاتية أو مستنداً مهنياً. أجرِ معي مقابلة تجريبية كاملة كأنك موظف الموارد البشرية في بنك كويتي. ابدأ بالسؤال الأول مباشرةً.`;
+
+    // Add a visible file card to the chat (content = aiPrompt so the API sees context)
+    const fileMsg: Message = {
+      role: "user",
+      content: aiPrompt,
+      fileUrl: upload.public_url,
+      fileName: upload.file_name,
+      fileKind,
+    };
+
+    setMessages((prev) => {
+      const updated = [...prev, fileMsg];
+      // Kick off AI response asynchronously with the updated history
+      triggerAiResponse(updated);
+      return updated;
+    });
+  }
+
+  async function triggerAiResponse(history: Message[]) {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const apiMessages = history.map((m) => ({
+        role: m.role,
+        content: m.isVoice ? `[🎤] ${m.content}` : m.content,
+      }));
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: apiMessages, sessionId }),
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json().catch(() => ({ error: "خطأ" }));
+        throw new Error(error);
+      }
+      if (!response.body) throw new Error("No body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = "";
+
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split("\n").filter((l) => l.startsWith("data: "))) {
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") break;
+          try {
+            const delta = JSON.parse(data).choices?.[0]?.delta?.content ?? "";
+            assistantContent += delta;
+            setMessages((prev) => {
+              const updated = [...prev];
+              updated[updated.length - 1] = { role: "assistant", content: assistantContent };
+              return updated;
+            });
+          } catch {}
+        }
+      }
+    } catch {
+      setMessages((prev) => [...prev, { role: "assistant", content: tx(t.training.error, lang) }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function toggleMic() {
     if (isListening) stopListening();
     else startListening();
@@ -204,13 +319,19 @@ export default function TrainingPage() {
                 {tx(t.training.welcomeSub, lang)}
               </p>
 
-              {/* Voice mode hint */}
-              {supported && (
-                <div className="mt-4 inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-xl px-4 py-2.5 text-xs text-primary font-semibold">
-                  <Mic size={13} />
-                  {isRTL ? "جرّب وضع الصوت — تحدّث بصوت عالٍ وسيحلّل المساعد ثقتك" : "Try voice mode — speak aloud and the AI will analyse your confidence"}
+              {/* Hint chips */}
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {supported && (
+                  <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-xl px-4 py-2.5 text-xs text-primary font-semibold">
+                    <Mic size={13} />
+                    {isRTL ? "جرّب وضع الصوت — تحدّث بصوت عالٍ" : "Try voice mode — speak aloud"}
+                  </div>
+                )}
+                <div className="inline-flex items-center gap-2 bg-surface border border-border rounded-xl px-4 py-2.5 text-xs text-muted font-semibold">
+                  <Paperclip size={13} />
+                  {isRTL ? "ارفع سيرتك الذاتية للتدريب عليها" : "Upload your CV to practise with it"}
                 </div>
-              )}
+              </div>
 
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto">
                 {STARTERS.map((q) => (
@@ -226,8 +347,11 @@ export default function TrainingPage() {
           {/* Messages */}
           {messages.map((msg, i) => (
             <div key={i} className="space-y-2">
-              <ChatMessage role={msg.role} content={msg.content} />
-              {/* Confidence badge under voice user messages */}
+              {msg.fileUrl ? (
+                <FileCard msg={msg} isRTL={isRTL} />
+              ) : (
+                <ChatMessage role={msg.role} content={msg.content} />
+              )}
               {msg.role === "user" && msg.isVoice && msg.meta && (
                 <div className={`flex ${isRTL ? "justify-end" : "justify-start"} ${isRTL ? "pr-2" : "pl-2"}`}>
                   <ConfidenceBadge meta={msg.meta} isRTL={isRTL} />
@@ -294,6 +418,36 @@ export default function TrainingPage() {
               </button>
             )}
 
+            {/* Paperclip — file upload */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowFilePicker((v) => !v)}
+                disabled={loading}
+                className="w-11 h-11 rounded-xl border border-border bg-surface text-muted flex items-center justify-center hover:text-primary hover:border-primary transition disabled:opacity-40">
+                <Paperclip size={18} />
+              </button>
+
+              {showFilePicker && (
+                <div className={`absolute bottom-14 ${isRTL ? "right-0" : "left-0"} bg-surface border border-border rounded-2xl shadow-lg p-2 w-44 z-20`}>
+                  <button
+                    type="button"
+                    onClick={() => { setShowDocUpload(true); setShowFilePicker(false); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-neutral text-sm font-medium text-gray-900 transition">
+                    <FileText size={15} className="text-primary shrink-0" />
+                    {isRTL ? "PDF / مستند" : "PDF / Doc"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowImgUpload(true); setShowFilePicker(false); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-neutral text-sm font-medium text-gray-900 transition">
+                    <ImageIcon size={15} className="text-secondary shrink-0" />
+                    {isRTL ? "صورة" : "Image"}
+                  </button>
+                </div>
+              )}
+            </div>
+
             <input
               ref={inputRef}
               type="text"
@@ -320,6 +474,25 @@ export default function TrainingPage() {
           </form>
         </div>
       </div>
+
+      {/* File upload modals */}
+      {showDocUpload && (
+        <DocumentUpload
+          onClose={() => setShowDocUpload(false)}
+          onSuccess={handleFileUploaded}
+        />
+      )}
+      {showImgUpload && (
+        <ImageUpload
+          onClose={() => setShowImgUpload(false)}
+          onSuccess={handleFileUploaded}
+        />
+      )}
+
+      {/* Close picker on outside click */}
+      {showFilePicker && (
+        <div className="fixed inset-0 z-10" onClick={() => setShowFilePicker(false)} />
+      )}
     </div>
   );
 }

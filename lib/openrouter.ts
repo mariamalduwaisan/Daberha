@@ -60,15 +60,14 @@ export async function streamChat(messages: Message[]): Promise<ReadableStream<Ui
       "X-Title": "دبرها – مساعد المقابلات",
     },
     body: JSON.stringify({
-      // Primary model + fallback list
-      model: "meta-llama/llama-3.3-70b-instruct:free",
-      route: "fallback",
+      // 'models' array = OpenRouter fallback chain — tries each in order
       models: [
         "meta-llama/llama-3.3-70b-instruct:free",
         "google/gemma-3-27b-it:free",
         "google/gemma-2-9b-it:free",
         "mistralai/mistral-7b-instruct:free",
         "microsoft/phi-3-mini-128k-instruct:free",
+        "deepseek/deepseek-r1-distill-llama-70b:free",
       ],
       messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
       stream: true,
